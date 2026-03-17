@@ -16,6 +16,15 @@ import { tokenManager } from "./lib/token-manager";
 import { useAuthStore } from "./store/auth-store";
 import ProtectedRoute from "./services/ProtectedRoute";
 import AdminDashboard from "./pages/AdminDashboard";
+import DashboardOverview from "./pages/admin/DashboardOverview";
+import MoviesManager from "./pages/admin/MoviesManager";
+import GenresManager from "./pages/admin/GenresManager";
+import LanguagesManager from "./pages/admin/LanguagesManager";
+import TheatersManager from "./pages/admin/TheatersManager";
+import ScreensManager from "./pages/admin/ScreensManager";
+import ShowtimesManager from "./pages/admin/ShowtimesManager";
+import BookingsManager from "./pages/admin/BookingsManager";
+import PaymentsManager from "./pages/admin/PaymentsManager";
 
 const MainLayout = () => {
   return (
@@ -124,7 +133,7 @@ const AppContent = () => {
           />
         </Route>
 
-        {/* admin only (no Navbar/Footer) */}
+        {/* admin routes */}
         <Route
           path="/admin-dashboard"
           element={
@@ -132,7 +141,17 @@ const AppContent = () => {
               <AdminDashboard />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<DashboardOverview />} />
+          <Route path="movies" element={<MoviesManager />} />
+          <Route path="genres" element={<GenresManager />} />
+          <Route path="languages" element={<LanguagesManager />} />
+          <Route path="theaters" element={<TheatersManager />} />
+          <Route path="screens" element={<ScreensManager />} />
+          <Route path="showtimes" element={<ShowtimesManager />} />
+          <Route path="bookings" element={<BookingsManager />} />
+          <Route path="payments" element={<PaymentsManager />} />
+        </Route>
 
         {/* catch-all (no Navbar/Footer) */}
         <Route path="*" element={<Unauthorized />} />

@@ -1,3 +1,5 @@
+import { StyledEngineProvider } from "@mui/material/styles";
+import GlobalStyles from "@mui/material/GlobalStyles";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
@@ -13,10 +15,13 @@ import { QueryProvider } from "./providers/queryProvider.tsx";
 
 createRoot(document.getElementById("root")!).render(
   // <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
-  <BrowserRouter>
+  <StyledEngineProvider enableCssLayer>
+    <GlobalStyles styles="@layer theme, base, mui, components, utilities;" />
+    <BrowserRouter>
       <QueryProvider>
         <App />
       </QueryProvider>
     </BrowserRouter>
+  </StyledEngineProvider>
   // </ClerkProvider>
 );
