@@ -8,7 +8,7 @@ const AdminDashboard = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <div className="flex bg-[#09090b] min-h-screen text-white font-sans selection:bg-primary/30 overflow-x-hidden">
+    <div className="flex bg-[#09090b] min-h-screen text-white font-sans selection:bg-primary/30 ">
       {/* Sidebar */}
       <AdminSidebar
         isMobileOpen={isMobileOpen}
