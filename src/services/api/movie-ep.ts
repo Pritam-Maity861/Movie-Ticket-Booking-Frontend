@@ -164,3 +164,10 @@ export const updateMovieApi = async ({
 export const deleteMovieApi = async (id: string): Promise<void> => {
   await httpService.delete(`/movie/delete-movie/${id}`);
 };
+
+
+export const getMovieById=async (id:string):Promise<MovieRes>=>{
+  const res=await httpService.get(`movie/get-movie/${id}`);
+  console.log(res);
+  return res.data.data;
+}

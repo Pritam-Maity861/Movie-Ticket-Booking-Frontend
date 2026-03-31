@@ -1,7 +1,8 @@
 import { Edit, List, MoreVertical, Trash2 } from "lucide-react";
-import { useMovies } from "../../hooks/useMovie";
+import { useDeleteMovie, useMovies } from "../../hooks/useMovie";
 import LoaderAnimation from "../LoaderAnimation";
 import { useEffect, useRef, useState } from "react";
+import toast from "react-hot-toast";
 
 const MovieList = () => {
   const {
@@ -12,6 +13,8 @@ const MovieList = () => {
     hasNextPage,
     isFetchingNextPage,
   } = useMovies();
+
+  const {mutateAsync:deleteMovie}=useDeleteMovie();
 
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -64,9 +67,24 @@ const MovieList = () => {
     // movie.credits.some((credit) =>
     //   credit.person.name.toLowerCase().includes(searchText)
     // )
+
+    
   });
+  const handleDelete= async(id:string)=>{
+      try{
+        //confarmation for delete movie
+        if(!confirm("Are you sure you want to delete this movie?")){
+          return;
+        }
+        await deleteMovie(id);
+        toast.success("Movie Deleted Successfully")
+      }catch(error){
+        console.log(error);
+        toast.error("Failed to delete movie")
+      }
+    }
   return (
-    <div className=" bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-2xl relative overflow-hidden group">
+    <div className=" bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-2xl relative overflow-hidden group min-h-[500px]">
       <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-[50px] rounded-full -mr-16 -mt-16 group-hover:bg-primary/20 transition-colors duration-500"></div>
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
@@ -161,7 +179,8 @@ const MovieList = () => {
                   <button className="text-white/40 hover:text-white transition-colors cursor-pointer">
                     <Edit size={20} />
                   </button>
-                  <button className="text-white/40 hover:text-white transition-colors cursor-pointer">
+                  <button className="text-white/40 hover:text-primary transition-colors cursor-pointer"
+                  onClick={() => handleDelete(movie.id)}>
                     <Trash2 size={20} />
                   </button>
                 </div>

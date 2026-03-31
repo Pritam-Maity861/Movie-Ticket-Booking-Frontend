@@ -13,6 +13,7 @@ import {
   Select,
   Box,
   TextField,
+  CircularProgress,
 } from "@mui/material";
 import { Delete, Plus } from "lucide-react";
 import { useState } from "react";
@@ -41,7 +42,7 @@ type credits = {
 // ];
 
 const MovieFormModal = ({ open, onClose }: MovieModalProps) => {
-  const { mutate: createMovieApi } = useCreateMovie();
+  const movieCreation = useCreateMovie();
   const { data: genres } = useGenres();
   const { data: languages } = useLanguages();
   const [form, setForm] = useState({
@@ -58,6 +59,8 @@ const MovieFormModal = ({ open, onClose }: MovieModalProps) => {
 
   const [poster, setPoster] = useState<File | null>(null);
   const [previewPoster, setPreviewPoster] = useState<string | null>(null);
+
+  const isSubmitting = movieCreation.isPending;
 
   const handleChange = (field: string, value: any) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -109,17 +112,18 @@ const MovieFormModal = ({ open, onClose }: MovieModalProps) => {
     if (poster) {
       formData.append("posterUrl", poster);
     }
-    for (const pair of formData.entries()) {
-        console.log(pair[0], pair[1]);
-      }
-    createMovieApi(formData, {
+    // for (const pair of formData.entries()) {
+    //     console.log(pair[0], pair[1]);
+    //   }
+    movieCreation.mutate(formData, {
       onSuccess: (data) => {
         console.log(data);
-        toast("Movie created successfully!", { icon: "✅" });
+        toast.success("Movie created successfully!", { icon: "✅" });
         onClose();
       },
       onError: (error: any) => {
         console.error("FULL ERROR:", error.response?.data);
+        toast.error("Failed to create movie ");
       },
     });
   };
@@ -519,26 +523,22 @@ const MovieFormModal = ({ open, onClose }: MovieModalProps) => {
         >
           Cancel
         </Button>
+        {/* //onclick while submitting the button loading .... */}
         <Button
+          type="submit"
           variant="contained"
           onClick={handleSubmit}
-          sx={{
-            bgcolor: "var(--color-primary)",
-            color: "white",
-            textTransform: "none",
-            fontWeight: 700,
-            px: 6,
-            py: 1.5,
-            borderRadius: "12px",
-            boxShadow: "0 8px 20px -6px rgba(248, 69, 101, 0.4)",
-            "&:hover": {
-              bgcolor: "var(--color-primary)",
-              opacity: 0.9,
-              boxShadow: "0 8px 25px -6px rgba(248, 69, 101, 0.5)",
-            },
-          }}
+          disabled={isSubmitting}
+          className="w-[150px] flex items-center justify-center py-3 mt-4 bg-primary hover:bg-primary-dull disabled:bg-primary/50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors shadow-lg shadow-primary/30"
         >
-          Save Movie
+          {isSubmitting ? (
+            <div className="flex items-center gap-2">
+              <CircularProgress size={18} sx={{ color: "white" }} />
+              Saving...
+            </div>
+          ) : (
+            "Save Movie"
+          )}
         </Button>
       </DialogActions>
     </Dialog>

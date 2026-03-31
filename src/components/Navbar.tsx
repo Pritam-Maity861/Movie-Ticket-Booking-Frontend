@@ -99,7 +99,6 @@ const Navbar = () => {
 
         {/* RIGHT SIDE */}
         <div className="flex items-center gap-6">
-          <SearchIcon className="max-md:hidden w-6 h-6 cursor-pointer" />
 
           {!isAuthenticated ? (
             <button

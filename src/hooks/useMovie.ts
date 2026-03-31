@@ -12,6 +12,7 @@ import {
   createMovieApi,
   updateMovieApi,
   deleteMovieApi,
+  getMovieById,
 } from "../services/api/movie-ep";
 
 export const useGenres = () => {
@@ -123,9 +124,18 @@ export const useUpdateMovie = () => {
 export const useDeleteMovie = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: deleteMovieApi,
+    mutationFn: (id:string)=>deleteMovieApi(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["getMovies"] });
     },
   });
 };
+
+
+export const useMovieById=(id:string)=>{
+  return useQuery({
+    queryKey:["getMovieById",id],
+    queryFn:()=>getMovieById(id),
+    enabled:!!id,
+  })
+}
