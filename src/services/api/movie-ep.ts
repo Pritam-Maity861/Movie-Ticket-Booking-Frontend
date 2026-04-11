@@ -134,7 +134,6 @@ export const deleteLanguageApi = async (id: string): Promise<void> => {
 
 export const getMoviesApi = async (pageParam:number): Promise<MoviesPaginatedRes> => {
   const res = await httpService.get(`/movie/get-all-movie?page=${pageParam}&limit=10`);
-  console.log(res);
   return res.data.data;
 };
 
@@ -146,7 +145,6 @@ export const createMovieApi = async (
       "Content-Type": "multipart/form-data",
     },
   });
-  console.log(res.data)
   return res.data.data;
 };
 

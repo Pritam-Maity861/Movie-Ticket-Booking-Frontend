@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import {  dummyDateTimeData } from "../assets/assets";
+import { dummyDateTimeData } from "../assets/assets";
 import {
   StarIcon,
   ClockIcon,
@@ -24,7 +24,7 @@ const MovieDetails = () => {
   // );
 
   const { data: movie, isLoading, isError } = useMovieById(id as string);
-  const {data:allmovies}=useMovies();
+  const { data: allmovies } = useMovies();
   const [selectedDate, setSelectedDate] = useState<string | null>(
     Object.keys(dummyDateTimeData)[0],
   );
@@ -36,12 +36,12 @@ const MovieDetails = () => {
   const availableDates = Object.keys(dummyDateTimeData).filter((dateStr) => {
     const date = new Date(dateStr);
     return date >= today;
-});
+  });
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-white font-semibold text-2xl">
-       <LoaderAnimation/>
+        <LoaderAnimation />
       </div>
     );
   }
@@ -62,7 +62,8 @@ const MovieDetails = () => {
     );
   }
 
-  const otherMovies = allmovies?.pages.flatMap((page) => page.movies)
+  const otherMovies = allmovies?.pages
+    .flatMap((page) => page.movies)
     .filter((show) => show.id !== movie.id)
     .slice(0, 4);
 
@@ -123,18 +124,27 @@ const MovieDetails = () => {
             </div>
 
             <div className="flex items-center gap-4 mt-6">
-              <button className="flex items-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 transition rounded-full font-semibold border border-gray-600 shadow-lg hover:shadow-xl cursor-pointer"
-              onClick={() => window.open(movie.trailerUrl, "_blank")}
+              <button
+                className="flex items-center gap-2 px-6 py-3 bg-gray-800 hover:bg-gray-700 transition rounded-full font-semibold border border-gray-600 shadow-lg hover:shadow-xl cursor-pointer"
+                onClick={() => window.open(movie.trailerUrl, "_blank")}
               >
                 <PlayIcon className="w-4 h-4" /> Watch Trailer
               </button>
-              <button className="px-8 py-3 bg-primary hover:bg-primary-dull transition rounded-full font-semibold shadow-lg shadow-primary/30 cursor-pointer"
-              onClick={() => document.getElementById("buy-ticket")?.scrollIntoView({ behavior: "smooth" })}
+              <button
+                className="px-8 py-3 bg-primary hover:bg-primary-dull transition rounded-full font-semibold shadow-lg shadow-primary/30 cursor-pointer"
+                onClick={() => {
+                  if (id) {
+                    navigate(`/movies/${id}/showtimes`);
+                  }
+                }}
               >
-                <p className="flex items-center gap-2"><TicketIcon className="w-4 h-5" /> Buy Tickets</p>
+                <p className="flex items-center gap-2">
+                  <TicketIcon className="w-4 h-5" /> Buy Tickets
+                </p>
               </button>
-              <button className="p-3 bg-gray-800 hover:bg-gray-700 transition rounded-full border border-gray-600 shadow-lg shadow-primary/30 group cursor-pointer"
-              onClick={() => setIsFavorite(!isFavorite)}  
+              <button
+                className="p-3 bg-gray-800 hover:bg-gray-700 transition rounded-full border border-gray-600 shadow-lg shadow-primary/30 group cursor-pointer"
+                onClick={() => setIsFavorite(!isFavorite)}
               >
                 <HeartIcon
                   className={`w-5 h-5 transition ${isFavorite ? "text-primary fill-primary" : "text-gray-300 group-hover:text-primary"}`}
@@ -144,75 +154,73 @@ const MovieDetails = () => {
           </div>
         </div>
         <main className="relative z-10 max-w-7xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
-          {/* Left Column: Info */}
-          <div className="lg:col-span-2 space-y-12">
-            {/* Synopsis Section */}
-            <section
-              className="animate-fade-in-up"
-              style={{ animationDelay: "0.1s" }}
-            >
-              <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
-                <div className="w-1.5 h-8 bg-primary rounded-full"></div>
-                About The Movie
-              </h3>
-              <p className="text-gray-400 text-lg leading-relaxed lg:text-xl">
-                {movie.description}
-              </p>
-            </section>
-
-            {/* Cast Section */}
-            <section
-              className="animate-fade-in-up"
-              style={{ animationDelay: "0.2s" }}
-            >
-              <div className="flex justify-between items-center mb-8">
-                <h3 className="text-2xl font-bold flex items-center gap-3">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-16">
+            {/* Left Column: Info */}
+            <div className="lg:col-span-2 space-y-12">
+              {/* Synopsis Section */}
+              <section
+                className="animate-fade-in-up"
+                style={{ animationDelay: "0.1s" }}
+              >
+                <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
                   <div className="w-1.5 h-8 bg-primary rounded-full"></div>
-                  Cast & Crew
+                  About The Movie
                 </h3>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
-                {movie.credits.map((credit) => (
-                  <div
-                    key={credit.id}
-                    className="group bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 rounded-2xl p-4 transition-all duration-300"
-                  >
-                    <div className="flex flex-col items-center text-center gap-3">
-                      <div className="relative">
-                        <img
-                          src={`https://api.dicebear.com/7.x/initials/svg?seed=${credit.person.name}&backgroundColor=f84565,d63854&fontFamily=Outfit`}
-                          alt={credit.person.name}
-                          className="w-20 h-20 rounded-full border-2 border-white/10 group-hover:border-primary/50 transition-colors object-cover"
-                        />
-                        <div className="absolute -bottom-1 -right-1 bg-primary text-[10px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">
-                          {credit.role}
+                <p className="text-gray-400 text-lg leading-relaxed lg:text-xl">
+                  {movie.description}
+                </p>
+              </section>
+
+              {/* Cast Section */}
+              <section
+                className="animate-fade-in-up"
+                style={{ animationDelay: "0.2s" }}
+              >
+                <div className="flex justify-between items-center mb-8">
+                  <h3 className="text-2xl font-bold flex items-center gap-3">
+                    <div className="w-1.5 h-8 bg-primary rounded-full"></div>
+                    Cast & Crew
+                  </h3>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+                  {movie.credits.map((credit) => (
+                    <div
+                      key={credit.id}
+                      className="group bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 rounded-2xl p-4 transition-all duration-300"
+                    >
+                      <div className="flex flex-col items-center text-center gap-3">
+                        <div className="relative">
+                          <img
+                            src={`https://api.dicebear.com/7.x/initials/svg?seed=${credit.person.name}&backgroundColor=f84565,d63854&fontFamily=Outfit`}
+                            alt={credit.person.name}
+                            className="w-20 h-20 rounded-full border-2 border-white/10 group-hover:border-primary/50 transition-colors object-cover"
+                          />
+                          <div className="absolute -bottom-1 -right-1 bg-primary text-[10px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-tighter">
+                            {credit.role}
+                          </div>
+                        </div>
+                        <div className="mt-1">
+                          <h4 className="font-bold text-sm text-white truncate max-w-[120px]">
+                            {credit.person.name}
+                          </h4>
+                          <p className="text-xs text-gray-500 truncate max-w-[120px]">
+                            {credit.characterName || credit.role}
+                          </p>
                         </div>
                       </div>
-                      <div className="mt-1">
-                        <h4 className="font-bold text-sm text-white truncate max-w-[120px]">
-                          {credit.person.name}
-                        </h4>
-                        <p className="text-xs text-gray-500 truncate max-w-[120px]">
-                          {credit.characterName || credit.role}
-                        </p>
-                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </section>
+                  ))}
+                </div>
+              </section>
+            </div>
           </div>
-          
-        </div>
 
-        {/* select date and proced for buy ticket */}
-        <section id="buy-ticket" className="animate-fade-in-up mt-10 " style={{ animationDelay: "0.4s" }}>
+          {/* select date and proced for buy ticket */}
+          {/* <section id="buy-ticket" className="animate-fade-in-up mt-10 " style={{ animationDelay: "0.4s" }}>
            <div className="lg:col-span-1 mt-10">
             <div className="sticky top-32 space-y-8">
-              {/* Booking Card */}
               <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden group">
-                {/* Decorative glow */}
+                
                 <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/20 blur-3xl rounded-full"></div>
 
                 <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
@@ -263,43 +271,39 @@ const MovieDetails = () => {
               </div>
             </div>
           </div>
-        </section>
+        </section> */}
 
-        {/* Related Movies Section */}
-        <section className="mt-24">
-          <div className="flex justify-between items-end mb-10">
-            <div>
-              <h3 className="text-3xl font-black flex items-center gap-3">
-                <div className="w-2 h-10 bg-primary rounded-full"></div>
-                More Like This
-              </h3>
-              <p className="text-gray-500 mt-2">
-                Personalized recommendations for you
-              </p>
+          {/* Related Movies Section */}
+          <section className="mt-24">
+            <div className="flex justify-between items-end mb-10">
+              <div>
+                <h3 className="text-3xl font-black flex items-center gap-3">
+                  <div className="w-2 h-10 bg-primary rounded-full"></div>
+                  More Like This
+                </h3>
+                <p className="text-gray-500 mt-2">
+                  Personalized recommendations for you
+                </p>
+              </div>
+              <button
+                onClick={() => {
+                  navigate("/movies");
+                  window.scrollTo(0, 0);
+                }}
+                className="px-6 py-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all font-bold text-sm group cursor-pointer"
+              >
+                See all{" "}
+                <ArrowLeftIcon className="w-4 h-4 inline ml-1 rotate-180 group-hover:translate-x-1 transition-transform" />
+              </button>
             </div>
-            <button
-              onClick={() => {
-                navigate("/movies");
-                window.scrollTo(0, 0);
-              }}
-              className="px-6 py-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-all font-bold text-sm group cursor-pointer"
-            >
-              See all{" "}
-              <ArrowLeftIcon className="w-4 h-4 inline ml-1 rotate-180 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {otherMovies?.map((m) => (
-              <MovieCard key={m.id} movie={m} />
-            ))} 
-          </div>
-        </section>
-      </main>
-
-     
-
-        
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              {otherMovies?.map((m) => (
+                <MovieCard key={m.id} movie={m} />
+              ))}
+            </div>
+          </section>
+        </main>
 
         {/* Related Movies */}
         {/* <div className="mt-20">

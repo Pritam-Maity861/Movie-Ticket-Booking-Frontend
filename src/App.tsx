@@ -3,8 +3,9 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Movies from "./pages/Movies";
 import MovieDetails from "./pages/MovieDetails";
-import SaetLayout from "./pages/SaetLayout";
+import SeatLayout from "./pages/SeatLayout";
 import MyBooking from "./pages/MyBooking";
+import Checkout from "./pages/Checkout";
 import Favorite from "./pages/Favorite";
 import Unauthorized from "./pages/Unauthorized";
 import Footer from "./components/Footer";
@@ -25,6 +26,8 @@ import ShowtimesManager from "./pages/admin/ShowtimesManager";
 import BookingsManager from "./pages/admin/BookingsManager";
 import PaymentsManager from "./pages/admin/PaymentsManager";
 import LoaderAnimation from "./components/LoaderAnimation";
+import MovieShowtimes from "./pages/MovieShowtimes";
+import ScrollToTop from "./utils/ScrollToTop";
 
 const MainLayout = () => {
   return (
@@ -59,13 +62,12 @@ const AppContent = () => {
   }, []);
 
   if (loading) {
-    return (
-      <LoaderAnimation/>
-    );
+    return <LoaderAnimation />;
   }
 
   return (
     <>
+    <ScrollToTop/>
       <Toaster />
       <Routes>
         {/* Routes with Navbar and Footer */}
@@ -73,7 +75,11 @@ const AppContent = () => {
           <Route path="/" element={<Home />} />
           <Route path="/movies" element={<Movies />} />
           <Route path="/movies/:id" element={<MovieDetails />} />
-          <Route path="/movies/:id/:date" element={<SaetLayout />} />
+          <Route path="/movies/:id/showtimes" element={<MovieShowtimes />} />
+          <Route
+            path="/movies/:id/:showtimeId/:date"
+            element={<SeatLayout />}
+          />
 
           {/* logged-in users */}
           <Route
@@ -81,6 +87,14 @@ const AppContent = () => {
             element={
               <ProtectedRoute>
                 <MyBooking />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/checkout/:bookingId"
+            element={
+              <ProtectedRoute>
+                <Checkout />
               </ProtectedRoute>
             }
           />

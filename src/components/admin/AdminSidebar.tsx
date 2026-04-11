@@ -16,8 +16,13 @@ import {
   Tv,
   X,
   ChevronLeft,
+  LogOut,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
+
+import { useAuthStore } from "../../store/auth-store";
+import { useNavigate } from "react-router-dom";
+import { Tooltip } from "@mui/material";
 
 interface MenuItem {
   text: string;
@@ -112,10 +117,18 @@ const AdminSidebar = ({
   setIsCollapsed,
 }: AdminSidebarProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [openMenus, setOpenMenus] = useState<Record<string, boolean>>({
     Content: true,
     Venues: true,
   });
+
+  const { user } = useAuthStore();
+
+  const handleLogout = () => {
+    useAuthStore.getState().logOut();
+    navigate("/");
+  };
 
   // Automatically close mobile sidebar on route change
   useEffect(() => {
@@ -159,7 +172,11 @@ const AdminSidebar = ({
             <span className="truncate">Admin Panel</span>
           </h1>
         )}
-        {isCollapsed && <Film className="text-primary w-8 h-8" />}
+        {isCollapsed && (
+          <Tooltip title="Admin Panel" placement="right">
+            <Film className="text-primary w-8 h-8" />
+          </Tooltip>
+        )}
 
         {/* Mobile Close Button */}
         <button
@@ -177,9 +194,21 @@ const AdminSidebar = ({
           const isOpen = openMenus[item.text];
           const active = isParentActive(item);
 
+          const renderWithTooltip = (element: React.ReactElement) => (
+            <Tooltip
+              title={isCollapsed ? item.text : ""}
+              placement="right"
+              arrow
+              disableHoverListener={!isCollapsed} // Disable when expanded
+            >
+              {element}
+            </Tooltip>
+          );
+
           return (
             <div key={item.text} className="space-y-1">
               {hasChildren ? (
+                renderWithTooltip(
                 <div className="relative group">
                   <button
                     onClick={() => toggleMenu(item.text)}
@@ -207,9 +236,8 @@ const AdminSidebar = ({
                         <ChevronRight size={16} />
                       ))}
                   </button>
-
-                  {/* Tooltip or hover menu for collapsed state could go here */}
                 </div>
+                )
               ) : (
                 <Link
                   to={item.path || "#"}
@@ -265,34 +293,49 @@ const AdminSidebar = ({
           )}
         >
           {isCollapsed ? (
-            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
-              A
-            </div>
+            <Tooltip title="Logout" placement="right">
+              <button
+                onClick={handleLogout}
+                className="text-sm flex p-2 items-center gap-2 font-semibold text-red-500/80 hover:text-red-500 truncate cursor-pointer"
+              >
+                <LogOut />
+              </button>
+            </Tooltip>
           ) : (
             <>
               <p className="text-xs text-white/40 mb-1 leading-relaxed">
                 Logged in as
               </p>
               <p className="text-sm font-semibold text-white/80 truncate">
-                Administrator
+                {user?.role} : {user?.name}
               </p>
+
+              <button
+                onClick={handleLogout}
+                className="text-sm flex pt-3 items-center gap-2 font-semibold text-red-500/80 hover:text-red-500 truncate cursor-pointer"
+              >
+                <LogOut /> Logout
+              </button>
             </>
           )}
         </div>
       </div>
 
-      {/* Desktop Collapse Toggle Button at very bottom */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
         className="hidden lg:flex items-center justify-center p-4 text-white/40 hover:text-white transition-colors border-t border-white/5"
       >
         {isCollapsed ? (
-          <ChevronRight size={20} />
+          <Tooltip title="Expand Sidebar" placement="right">
+            <ChevronRight size={20} />
+          </Tooltip>
         ) : (
-          <div className="flex items-center gap-2">
-            <ChevronLeft size={20} />{" "}
-            <span className="text-xs">Collapse Sidebar</span>
-          </div>
+          <Tooltip title="Collapse Sidebar" placement="right">
+            <div className="flex items-center gap-2">
+              <ChevronLeft size={20} />{" "}
+              <span className="text-xs">Collapse Sidebar</span>
+            </div>
+          </Tooltip>
         )}
       </button>
     </div>
