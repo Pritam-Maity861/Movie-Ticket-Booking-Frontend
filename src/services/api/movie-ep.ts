@@ -169,3 +169,10 @@ export const getMovieById=async (id:string):Promise<MovieRes>=>{
   console.log(res);
   return res.data.data;
 }
+
+// get all movie without pagination
+export const getAllMovieWithoutPagination=async ():Promise<MovieRes[]>=>{
+  const res=await httpService.get(`movie/get-all/`);
+  console.log(res);
+  return res.data.data;
+}

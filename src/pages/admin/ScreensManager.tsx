@@ -1,9 +1,22 @@
+import TheatersList from "../../components/admin/TheatersList";
+
 const ScreensManager = () => {
   return (
-    <div className="p-8 w-full">
-      <h1 className="text-3xl font-bold mb-6 text-white tracking-wide">Screens Management</h1>
-      <div className="bg-white/5 border border-white/10 rounded-xl p-6 shadow-lg backdrop-blur-sm">
-        <p className="text-gray-400">Manage your screens management here. This component is ready to be connected to your API.</p>
+    <div className="h-screen overflow-y-auto scrollbar-hide">
+      <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+              Screen Management
+            </h1>
+            <p className="text-white/40 text-sm mt-1">
+              Select a theater to manage its screens.
+            </p>
+          </div>
+        </div>
+
+        <TheatersList />
       </div>
     </div>
   );

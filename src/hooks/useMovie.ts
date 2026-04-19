@@ -1,4 +1,9 @@
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   createGenreApi,
   createLanguageApi,
@@ -13,6 +18,7 @@ import {
   updateMovieApi,
   deleteMovieApi,
   getMovieById,
+  getAllMovieWithoutPagination,
 } from "../services/api/movie-ep";
 
 export const useGenres = () => {
@@ -92,12 +98,20 @@ export const useDeleteLanguage = () => {
 export const useMovies = () => {
   return useInfiniteQuery({
     queryKey: ["getMovies"],
-    initialPageParam:1,
-    queryFn: ({pageParam=1})=>getMoviesApi(pageParam),  
+    initialPageParam: 1,
+    queryFn: ({ pageParam = 1 }) => getMoviesApi(pageParam),
 
-    getNextPageParam:(lastPage,allPage)=>{
-      return lastPage.hasMore ? allPage.length+1:undefined
-    }
+    getNextPageParam: (lastPage, allPage) => {
+      return lastPage.hasMore ? allPage.length + 1 : undefined;
+    },
+  });
+};
+
+export const useMoviesWithoutPagination = (enabled: boolean = true) => {
+  return useQuery({
+    queryKey: ["getMoviesWithoutPagination"],
+    queryFn: getAllMovieWithoutPagination,
+    enabled: enabled,
   });
 };
 
@@ -106,7 +120,9 @@ export const useCreateMovie = () => {
   return useMutation({
     mutationFn: createMovieApi,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["getMovies"] });
+      queryClient.invalidateQueries({
+        queryKey: ["getMovies", "getMoviesWithoutPagination"],
+      });
     },
   });
 };
@@ -124,18 +140,17 @@ export const useUpdateMovie = () => {
 export const useDeleteMovie = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id:string)=>deleteMovieApi(id),
+    mutationFn: (id: string) => deleteMovieApi(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["getMovies"] });
     },
   });
 };
 
-
-export const useMovieById=(id:string)=>{
+export const useMovieById = (id: string) => {
   return useQuery({
-    queryKey:["getMovieById",id],
-    queryFn:()=>getMovieById(id),
-    enabled:!!id,
-  })
-}
+    queryKey: ["getMovieById", id],
+    queryFn: () => getMovieById(id),
+    enabled: !!id,
+  });
+};

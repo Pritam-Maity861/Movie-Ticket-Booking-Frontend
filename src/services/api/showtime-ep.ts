@@ -21,6 +21,15 @@ export interface TheaterShowtimes {
   screens: Screen[];
 }
 
+export interface CreateShowTimePayload{
+  screenId:string;
+  movieId:string;
+  startTime:string;
+  vipSeatPrice:number;
+  premiumSeatPrice:number;
+  regularSeatPrice:number;
+}
+
 export const getShowtimesApi = async (
   movieId: string,
   date: string,
@@ -37,3 +46,9 @@ export const getShowtimeByIdApi = async (id: string): Promise<any> => {
   console.log(res.data);
   return res.data.data;
 };
+
+export const createShowtimeApi = async (payload:CreateShowTimePayload) => {
+  const res = await httpService.post("/showtime/create-showtime", payload);
+  console.log(`created showtime data:${res}`);
+  return res.data.data;
+}

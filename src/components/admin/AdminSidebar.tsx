@@ -67,24 +67,19 @@ const menuItems: MenuItem[] = [
         path: "/admin-dashboard/theaters",
         icon: <Monitor size={18} />,
       },
-      {
-        text: "Screens",
-        path: "/admin-dashboard/screens",
-        icon: <Tv size={18} />,
-      },
     ],
   },
-  {
-    text: "Scheduling",
-    icon: <Calendar size={20} />,
-    children: [
-      {
-        text: "Showtimes",
-        path: "/admin-dashboard/showtimes",
-        icon: <Calendar size={18} />,
-      },
-    ],
-  },
+  // {
+  //   text: "Scheduling",
+  //   icon: <Calendar size={20} />,
+  //   children: [
+  //     {
+  //       text: "Showtimes",
+  //       path: "/admin-dashboard/showtimes",
+  //       icon: <Calendar size={18} />,
+  //     },
+  //   ],
+  // },
   {
     text: "Orders",
     icon: <ShoppingBag size={20} />,
