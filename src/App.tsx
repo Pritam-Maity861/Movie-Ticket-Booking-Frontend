@@ -28,6 +28,7 @@ import PaymentsManager from "./pages/admin/PaymentsManager";
 import LoaderAnimation from "./components/LoaderAnimation";
 import MovieShowtimes from "./pages/MovieShowtimes";
 import ScrollToTop from "./utils/ScrollToTop";
+import BookingSuccess from "./pages/BookingSuccess";
 
 const MainLayout = () => {
   return (
@@ -67,7 +68,7 @@ const AppContent = () => {
 
   return (
     <>
-    <ScrollToTop/>
+      <ScrollToTop />
       <Toaster />
       <Routes>
         {/* Routes with Navbar and Footer */}
@@ -103,6 +104,14 @@ const AppContent = () => {
             element={
               <ProtectedRoute>
                 <Favorite />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/booking-success/:bookingId"
+            element={
+              <ProtectedRoute>
+                <BookingSuccess />
               </ProtectedRoute>
             }
           />

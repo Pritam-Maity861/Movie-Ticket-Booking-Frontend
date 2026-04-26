@@ -14,10 +14,14 @@ import LoaderAnimation from "../components/LoaderAnimation";
 import BlurBackground from "../components/BlurBackground";
 import CheckoutTimer from "../components/CheckoutTimer";
 import toast from "react-hot-toast";
+import { useState } from "react";
+import { loadRazorpayScript } from "../utils/loadRazorpay";
+import { createOrder, verifyPayment } from "../services/api/payment-ep";
 
 const Checkout = () => {
   const { bookingId } = useParams();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
   const {
     data: response,
     isLoading,
@@ -30,7 +34,7 @@ const Checkout = () => {
       "Your booking session has expired. Please select seats again.",
       {
         id: "booking-expired", // Prevent multiple toasts
-      },
+      }
     );
     // Redirect to movie page or seat layout
     if (booking?.showtime?.movieId) {
@@ -78,6 +82,80 @@ const Checkout = () => {
     handleExpire();
     return null;
   }
+
+  const handlePayment = async () => {
+    try {
+      setLoading(true);
+      //load razorpay script
+      const isLoded = await loadRazorpayScript();
+      console.log(isLoded)
+      if (!isLoded) {
+        toast.error("Failed to load payment gateway. Please try again later.");
+        return;
+      }
+
+      //create order
+      console.log("Creating order for bookingId:", bookingId);
+      const order = await createOrder(bookingId as string);
+
+      //configure option razorpay
+      const options = {
+        key: order.key,
+        amount: order.amount,
+        currency: order.currency,
+        order_id: order.orderId,
+
+        name: "Movie Booking",
+        description: movie.title,
+
+        handler: async function (response: any) {
+          try {
+            await verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+            toast.success("Payment successful 🎉");
+            navigate(`/booking-success/${bookingId}`);
+          } catch (error) {
+            console.error(error);
+            toast("Payment verification failed", { position: "top-center" });
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            toast("Payment cancelled", { icon: "⚠️" });
+          },
+        },
+
+        prefill: {
+          name: "user",
+          email: "user@example.com",
+        },
+
+        theme: {
+          color: "#3399cc",
+        },
+      };
+      
+      //open razorpay modal
+      const rzp=new (window as any).Razorpay(options);
+
+      if (booking.status !== "PENDING") {
+        toast.error("Booking is no longer valid");
+        return;
+      }
+      rzp.on("payment.failed", function () {
+        toast.error("Payment failed. Try again.");
+      });
+      rzp.open();
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen pt-28 pb-20 text-white bg-black relative overflow-x-hidden">
@@ -250,7 +328,7 @@ const Checkout = () => {
                       ₹
                       {
                         showtime.seatPricings.find(
-                          (p: any) => p.seatType === item.seat.type,
+                          (p: any) => p.seatType === item.seat.type
                         )?.price
                       }
                     </span>
@@ -276,14 +354,10 @@ const Checkout = () => {
 
               <button
                 className="w-full py-5 bg-primary hover:bg-primary-dull text-white rounded-[2rem] font-black flex items-center justify-center gap-3 shadow-2xl shadow-primary/30 transition-all active:scale-95 group overflow-hidden relative cursor-pointer"
-                onClick={() =>
-                  toast("Payment gateway integration coming soon...", {
-                    icon: "💰",
-                  })
-                }
+                onClick={handlePayment}
               >
-                <div className="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 skew-x-[-20deg]"></div>
-                MAKE PAYMENT <CreditCardIcon className="w-5 h-5" />
+                <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 skew-x-[-20deg]"></div>
+                {loading ? "PROCESSING..." : "MAKE PAYMENT"}
               </button>
 
               <p className="text-center text-[10px] font-bold text-gray-500 mt-6 leading-relaxed">
