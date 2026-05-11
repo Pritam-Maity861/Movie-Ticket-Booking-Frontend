@@ -6,7 +6,6 @@ import {
   CalendarIcon,
   ClockIcon,
   TicketIcon,
-  HomeIcon,
 } from "lucide-react";
 import LoaderAnimation from "../components/LoaderAnimation";
 import BlurBackground from "../components/BlurBackground";

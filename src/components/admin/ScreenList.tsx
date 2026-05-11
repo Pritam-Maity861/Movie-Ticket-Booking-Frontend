@@ -56,9 +56,9 @@ const ScreenList = ({ theaterId, onBack }: ScreenListProps) => {
   });
   console.log(data);
 
-  const handleShowtime = (screenId: string) => {
-    toast.error(`Showtime management coming soon! for screenId: ${screenId}`);
-  };
+  // const handleShowtime = (screenId: string) => {
+  //   toast.error(`Showtime management coming soon! for screenId: ${screenId}`);
+  // };
 
   const handleDelete = async (id: string) => {
     try {

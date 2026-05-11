@@ -5,7 +5,6 @@ import {
   MapPinIcon,
   CalendarIcon,
   ClockIcon,
-  CreditCardIcon,
   TicketIcon,
   ShieldCheckIcon,
   AlertCircleIcon,
