@@ -4,7 +4,6 @@ import {
   LayoutDashboard,
   Film,
   MapPin,
-  Calendar,
   ShoppingBag,
   ChevronDown,
   ChevronRight,
@@ -13,10 +12,10 @@ import {
   Languages,
   Ticket,
   CreditCard,
-  Tv,
   X,
   ChevronLeft,
   LogOut,
+  Users,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 
@@ -95,6 +94,11 @@ const menuItems: MenuItem[] = [
         icon: <CreditCard size={18} />,
       },
     ],
+  },
+  {
+    text: "Users",
+    icon: <Users size={20} />,
+    path: "/admin-dashboard/users",
   },
 ];
 
@@ -204,34 +208,36 @@ const AdminSidebar = ({
             <div key={item.text} className="space-y-1">
               {hasChildren ? (
                 renderWithTooltip(
-                <div className="relative group">
-                  <button
-                    onClick={() => toggleMenu(item.text)}
-                    className={cn(
-                      "w-full flex items-center p-2.5 rounded-lg transition-all duration-200 text-white/60 hover:text-white hover:bg-white/5",
-                      active && "text-white bg-white/5",
-                      isCollapsed ? "justify-center px-0" : "justify-between",
-                    )}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span
-                        className={cn(
-                          "transition-colors shrink-0",
-                          active ? "text-primary" : "group-hover:text-primary",
-                        )}
-                      >
-                        {item.icon}
-                      </span>
-                      {!isCollapsed && <span>{item.text}</span>}
-                    </div>
-                    {!isCollapsed &&
-                      (isOpen ? (
-                        <ChevronDown size={16} />
-                      ) : (
-                        <ChevronRight size={16} />
-                      ))}
-                  </button>
-                </div>
+                  <div className="relative group">
+                    <button
+                      onClick={() => toggleMenu(item.text)}
+                      className={cn(
+                        "w-full flex items-center p-2.5 rounded-lg transition-all duration-200 text-white/60 hover:text-white hover:bg-white/5",
+                        active && "text-white bg-white/5",
+                        isCollapsed ? "justify-center px-0" : "justify-between",
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={cn(
+                            "transition-colors shrink-0",
+                            active
+                              ? "text-primary"
+                              : "group-hover:text-primary",
+                          )}
+                        >
+                          {item.icon}
+                        </span>
+                        {!isCollapsed && <span>{item.text}</span>}
+                      </div>
+                      {!isCollapsed &&
+                        (isOpen ? (
+                          <ChevronDown size={16} />
+                        ) : (
+                          <ChevronRight size={16} />
+                        ))}
+                    </button>
+                  </div>,
                 )
               ) : (
                 <Link

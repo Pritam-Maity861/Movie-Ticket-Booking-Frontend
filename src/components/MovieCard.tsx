@@ -28,20 +28,33 @@ interface Movie {
   updatedAt: string;
 }
 
-const MovieCard = ({ movie }: { movie: Movie }) => {
+const MovieCard = ({
+  movie,
+  isNewRelease = false,
+}: {
+  movie: Movie;
+  isNewRelease?: boolean;
+}) => {
   const navigate = useNavigate();
 
   return (
-    <div className="flex flex-col justify-between p-3 bg-gray-800 rounded-2xl hover:-translate-y-1 transition duration-300 w-66">
-      <img
-        onClick={() => {
-          navigate(`/movies/${movie.id}`);
-          scrollTo(0, 0);
-        }}
-        src={movie.posterUrl}
-        alt=""
-        className="h-64 w-full object-cover object-top cursor-pointer rounded-lg"
-      />
+    <div className="flex flex-col justify-between p-4 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/8 hover:-translate-y-2 transition-all duration-300 w-full group shadow-lg">
+      <div className="relative">
+        <img
+          onClick={() => {
+            navigate(`/movies/${movie.id}`);
+            scrollTo(0, 0);
+          }}
+          src={movie.posterUrl}
+          alt={movie.title}
+          className="h-64 w-full object-cover object-top cursor-pointer rounded-lg"
+        />
+        {isNewRelease && (
+          <span className="absolute top-2 right-2 bg-red-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-md z-10">
+            NEW RELEASE
+          </span>
+        )}
+      </div>
       <p className="font-semibold mt-2 truncate">{movie.title}</p>
       <p className="">
         {new Date(movie.releaseDate).getFullYear()} •{" "}

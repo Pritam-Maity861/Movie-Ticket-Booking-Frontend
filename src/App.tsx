@@ -6,9 +6,10 @@ import MovieDetails from "./pages/MovieDetails";
 import SeatLayout from "./pages/SeatLayout";
 import MyBooking from "./pages/MyBooking";
 import Checkout from "./pages/Checkout";
-import Favorite from "./pages/Favorite";
 import Unauthorized from "./pages/Unauthorized";
 import Footer from "./components/Footer";
+import Releases from "./pages/Releases";
+import AboutUs from "./pages/AboutUs";
 import { Toaster } from "react-hot-toast";
 import { useEffect, useState } from "react";
 import { refreshTokenApi } from "./services/api/auth-ep";
@@ -25,10 +26,12 @@ import ScreensManager from "./pages/admin/ScreensManager";
 import ShowtimesManager from "./pages/admin/ShowtimesManager";
 import BookingsManager from "./pages/admin/BookingsManager";
 import PaymentsManager from "./pages/admin/PaymentsManager";
+import UsersManager from "./pages/admin/UsersManager";
 import LoaderAnimation from "./components/LoaderAnimation";
 import MovieShowtimes from "./pages/MovieShowtimes";
 import ScrollToTop from "./utils/ScrollToTop";
 import BookingSuccess from "./pages/BookingSuccess";
+import Profile from "./pages/Profile";
 
 const MainLayout = () => {
   return (
@@ -76,6 +79,8 @@ const AppContent = () => {
           <Route path="/" element={<Home />} />
           <Route path="/movies" element={<Movies />} />
           <Route path="/movies/:id" element={<MovieDetails />} />
+          <Route path="/releases" element={<Releases />} />
+          <Route path="/about-us" element={<AboutUs />} />
           <Route path="/movies/:id/showtimes" element={<MovieShowtimes />} />
           <Route
             path="/movies/:id/:showtimeId/:date"
@@ -100,18 +105,18 @@ const AppContent = () => {
             }
           />
           <Route
-            path="/favorite"
-            element={
-              <ProtectedRoute>
-                <Favorite />
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/booking-success/:bookingId"
             element={
               <ProtectedRoute>
                 <BookingSuccess />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
               </ProtectedRoute>
             }
           />
@@ -135,6 +140,7 @@ const AppContent = () => {
           <Route path="showtimes" element={<ShowtimesManager />} />
           <Route path="bookings" element={<BookingsManager />} />
           <Route path="payments" element={<PaymentsManager />} />
+          <Route path="users" element={<UsersManager />} />
         </Route>
 
         {/* catch-all (no Navbar/Footer) */}

@@ -16,13 +16,20 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { Delete, Plus } from "lucide-react";
-import { useState } from "react";
-import { useCreateMovie, useGenres, useLanguages } from "../../hooks/useMovie";
+import { useEffect, useState } from "react";
+import {
+  useCreateMovie,
+  useGenres,
+  useLanguages,
+  useUpdateMovie,
+} from "../../hooks/useMovie";
 import toast from "react-hot-toast";
 
 type MovieModalProps = {
   open: boolean;
   onClose: () => void;
+  initialData?: any;
+  isEdit?: boolean;
 };
 
 type credits = {
@@ -41,8 +48,14 @@ type credits = {
 //   { id: "2", name: "Hindi" },
 // ];
 
-const MovieFormModal = ({ open, onClose }: MovieModalProps) => {
+const MovieFormModal = ({
+  open,
+  onClose,
+  initialData,
+  isEdit = false,
+}: MovieModalProps) => {
   const movieCreation = useCreateMovie();
+  const updateMovie = useUpdateMovie();
   const { data: genres } = useGenres();
   const { data: languages } = useLanguages();
   const [form, setForm] = useState({
@@ -60,7 +73,30 @@ const MovieFormModal = ({ open, onClose }: MovieModalProps) => {
   const [poster, setPoster] = useState<File | null>(null);
   const [previewPoster, setPreviewPoster] = useState<string | null>(null);
 
-  const isSubmitting = movieCreation.isPending;
+  const isSubmitting = movieCreation.isPending || updateMovie.isPending;
+
+  //prefill the form if initialData is provided and isEdit is true
+  useEffect(() => {
+    if (initialData && isEdit) {
+      setForm({
+        title: initialData.title || "",
+        description: initialData.description || "",
+        releaseDate: initialData.releaseDate?.split("T")[0] || "",
+        genreIds: initialData.genres?.map((g: any) => g.id) || [],
+        languageIds: initialData.languages?.map((l: any) => l.id) || [],
+        credits:
+          initialData.credits?.map((c: any) => ({
+            name: c.person?.name || c.name || "",
+            role: c.role || "ACTOR",
+            characterName: c.characterName || "",
+          })) || [],
+        duration: initialData.duration || "",
+        trailerUrl: initialData.trailerUrl || "",
+        rating: initialData.rating || "",
+      });
+      setPreviewPoster(initialData.posterUrl || null);
+    }
+  }, [initialData, isEdit]);
 
   const handleChange = (field: string, value: any) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -100,32 +136,58 @@ const MovieFormModal = ({ open, onClose }: MovieModalProps) => {
 
   const handleSubmit = () => {
     const formData = new FormData();
-    formData.append("title", form.title);
-    formData.append("description", form.description);
-    formData.append("releaseDate", form.releaseDate);
-    formData.append("duration", form.duration.toString());
-    formData.append("trailerUrl", form.trailerUrl);
-    formData.append("rating", form.rating.toString());
-    formData.append("genreIds", JSON.stringify(form.genreIds));
-    formData.append("languageIds", JSON.stringify(form.languageIds));
-    formData.append("credits", JSON.stringify(form.credits));
+    Object.entries(form).forEach(([key, value]) => {
+      if (["genreIds", "languageIds", "credits"].includes(key)) {
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, String(value));
+      }
+    });
+    // formData.append("title", form.title);
+    // formData.append("description", form.description);
+    // formData.append("releaseDate", form.releaseDate);
+    // formData.append("duration", form.duration.toString());
+    // formData.append("trailerUrl", form.trailerUrl);
+    // formData.append("rating", form.rating.toString());
+    // formData.append("genreIds", JSON.stringify(form.genreIds));
+    // formData.append("languageIds", JSON.stringify(form.languageIds));
+    // formData.append("credits", JSON.stringify(form.credits));
     if (poster) {
       formData.append("posterUrl", poster);
     }
     // for (const pair of formData.entries()) {
     //     console.log(pair[0], pair[1]);
     //   }
-    movieCreation.mutate(formData, {
-      onSuccess: (data) => {
-        console.log(data);
-        toast.success("Movie created successfully!", { icon: "✅" });
+
+    const mutation = isEdit
+      ? updateMovie.mutateAsync({
+          id: initialData.id,
+          movieData: formData,
+        })
+      : movieCreation.mutateAsync(formData);
+
+    mutation
+      .then(() => {
+        toast.success(
+          isEdit ? "Movie updated successfully" : "Movie created successfully",
+        );
         onClose();
-      },
-      onError: (error: any) => {
-        console.error("FULL ERROR:", error.response?.data);
-        toast.error("Failed to create movie ");
-      },
-    });
+      })
+      .catch(() => {
+        toast.error(isEdit ? "Update failed" : "Creation failed");
+      });
+
+    // movieCreation.mutate(formData, {
+    //   onSuccess: (data) => {
+    //     console.log(data);
+    //     toast.success("Movie created successfully!", { icon: "✅" });
+    //     onClose();
+    //   },
+    //   onError: (error: any) => {
+    //     console.error("FULL ERROR:", error.response?.data);
+    //     toast.error("Failed to create movie ");
+    //   },
+    // });
   };
 
   return (
@@ -152,7 +214,7 @@ const MovieFormModal = ({ open, onClose }: MovieModalProps) => {
           fontSize: "1.5rem",
         }}
       >
-        Add New Movie
+        {isEdit ? "Update Movie" : "Add New Movie"}
       </DialogTitle>
       <DialogContent
         className="space-y-6 mt-2"
@@ -529,16 +591,23 @@ const MovieFormModal = ({ open, onClose }: MovieModalProps) => {
           variant="contained"
           onClick={handleSubmit}
           disabled={isSubmitting}
-          className="w-[150px] flex items-center justify-center py-3 mt-4 bg-primary hover:bg-primary-dull disabled:bg-primary/50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors shadow-lg shadow-primary/30"
+          className="w-37.5 flex items-center justify-center py-3 mt-4 bg-primary hover:bg-primary-dull disabled:bg-primary/50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors shadow-lg shadow-primary/30"
         >
           {isSubmitting ? (
+            <CircularProgress size={20} />
+          ) : isEdit ? (
+            "Update Movie"
+          ) : (
+            "Save Movie"
+          )}
+          {/* {isSubmitting ? (
             <div className="flex items-center gap-2">
               <CircularProgress size={18} sx={{ color: "white" }} />
               Saving...
             </div>
           ) : (
             "Save Movie"
-          )}
+          )} */}
         </Button>
       </DialogActions>
     </Dialog>

@@ -3,6 +3,7 @@ import { useDeleteMovie, useMovies } from "../../hooks/useMovie";
 import LoaderAnimation from "../LoaderAnimation";
 import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
+import MovieFormModal from "./MovieFormModal";
 
 const MovieList = () => {
   const {
@@ -14,17 +15,27 @@ const MovieList = () => {
     isFetchingNextPage,
   } = useMovies();
 
-  const {mutateAsync:deleteMovie}=useDeleteMovie();
+  const { mutateAsync: deleteMovie } = useDeleteMovie();
 
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
- const [openMenuId, setOpenMenuId] = useState<string | null>(null);
- const handleToggleMenu = (id: string) => {
-  setOpenMenuId((prev) => (prev === id ? null : id));
-};
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const handleToggleMenu = (id: string) => {
+    setOpenMenuId((prev) => (prev === id ? null : id));
+  };
   console.log(data);
   const observerRef = useRef(null);
+  const [open, setOpen] = useState(false);
+  const [selectedMovie, setSelectedMovie] = useState<any>(null);
+  const handleOpen = (movie?: any) => {
+    if (movie) setSelectedMovie(movie);
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setSelectedMovie(null);
+    setOpen(false);
+  };
 
   //flatten pages
   const movies = data?.pages.flatMap((page) => page.movies) || [];
@@ -67,22 +78,20 @@ const MovieList = () => {
     // movie.credits.some((credit) =>
     //   credit.person.name.toLowerCase().includes(searchText)
     // )
-
-    
   });
-  const handleDelete= async(id:string)=>{
-      try{
-        //confarmation for delete movie
-        if(!confirm("Are you sure you want to delete this movie?")){
-          return;
-        }
-        await deleteMovie(id);
-        toast.success("Movie Deleted Successfully")
-      }catch(error){
-        console.log(error);
-        toast.error("Failed to delete movie")
+  const handleDelete = async (id: string) => {
+    try {
+      //confarmation for delete movie
+      if (!confirm("Are you sure you want to delete this movie?")) {
+        return;
       }
+      await deleteMovie(id);
+      toast.success("Movie Deleted Successfully");
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to delete movie");
     }
+  };
   return (
     <div className=" bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-xl shadow-2xl relative overflow-hidden group min-h-[500px]">
       <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-[50px] rounded-full -mr-16 -mt-16 group-hover:bg-primary/20 transition-colors duration-500"></div>
@@ -173,19 +182,24 @@ const MovieList = () => {
             </button>
             {/* menu */}
             {openMenuId === movie.id && (
-            <div className="absolute top-10 right-6">
-              <div className="bg-white/5 border border-white/10 rounded-2xl p-2 backdrop-blur-xl shadow-2xl relative overflow-hidden group">
-                <div className="flex flex-col gap-2">
-                  <button className="text-white/40 hover:text-white transition-colors cursor-pointer">
-                    <Edit size={20} />
-                  </button>
-                  <button className="text-white/40 hover:text-primary transition-colors cursor-pointer"
-                  onClick={() => handleDelete(movie.id)}>
-                    <Trash2 size={20} />
-                  </button>
+              <div className="absolute top-10 right-6">
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-2 backdrop-blur-xl shadow-2xl relative overflow-hidden group">
+                  <div className="flex flex-col gap-2">
+                    <button
+                      className="text-white/40 hover:text-white transition-colors cursor-pointer"
+                      onClick={() => handleOpen(movie)}
+                    >
+                      <Edit size={20} />
+                    </button>
+                    <button
+                      className="text-white/40 hover:text-primary transition-colors cursor-pointer"
+                      onClick={() => handleDelete(movie.id)}
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
             )}
           </div>
         </div>
@@ -199,6 +213,13 @@ const MovieList = () => {
           </div>
         )}
       </div>
+
+      <MovieFormModal
+        open={open}
+        onClose={handleClose}
+        isEdit={!!selectedMovie}
+        initialData={selectedMovie || null}
+      />
     </div>
   );
 };

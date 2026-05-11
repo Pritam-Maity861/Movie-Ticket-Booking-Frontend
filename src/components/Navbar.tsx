@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { assets } from "../assets/assets";
-import { MenuIcon, SearchIcon, XIcon, UserCircle } from "lucide-react";
+import { MenuIcon, XIcon, UserCircle } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
 import LoginModal from "../components/LoginModal";
@@ -13,8 +13,8 @@ const Navbar = () => {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const allDeviceLogOut=useAllDevicesLogout()
-  const logOutSingleDevice=useLogout();
+  const allDeviceLogOut = useAllDevicesLogout();
+  const logOutSingleDevice = useLogout();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -29,19 +29,16 @@ const Navbar = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const { user, isAuthenticated} = useAuthStore();
+  const { user, isAuthenticated } = useAuthStore();
 
   const handleLogout = () => {
     try {
       logOutSingleDevice.mutate();
-      
-
     } catch (err) {
       toast.error("Logout failed. Please try again.");
       console.error("Logout failed:", err);
     }
   };
-
 
   const handleAllDevicesLogout = () => {
     try {
@@ -77,10 +74,11 @@ const Navbar = () => {
           {[
             { path: "/", name: "Home" },
             { path: "/movies", name: "Movies" },
-            { path: "/", name: "Theaters" },
-            { path: "/", name: "Releases" },
-            { path: "/favorite", name: "Favorites" },
+            { path: "/releases", name: "Releases" },
             { path: "/about-us", name: "About Us" },
+            ...(isAuthenticated
+              ? [{ path: "/my-bookings", name: "My Bookings" }]
+              : []),
           ].map((link) => (
             <Link
               key={link.name}
@@ -99,7 +97,6 @@ const Navbar = () => {
 
         {/* RIGHT SIDE */}
         <div className="flex items-center gap-6">
-
           {!isAuthenticated ? (
             <button
               onClick={() => setIsLoginOpen(true)}
@@ -114,7 +111,15 @@ const Navbar = () => {
                 className="flex items-center gap-2 cursor-pointer focus:outline-none"
               >
                 <div className="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center border border-gray-600 hover:border-primary transition overflow-hidden">
-                  <UserCircle className="w-8 h-8 text-gray-400" />
+                  {user?.profilePic ? (
+                    <img
+                      src={user.profilePic}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <UserCircle className="w-8 h-8 text-gray-400" />
+                  )}
                 </div>
               </button>
 

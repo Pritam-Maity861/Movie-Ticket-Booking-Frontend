@@ -16,7 +16,7 @@ export interface Credit {
   id: string;
   movieId: string;
   personId: string;
-  role: "ACTOR" | "DIRECTOR" | "PRODUCER"; 
+  role: "ACTOR" | "DIRECTOR" | "PRODUCER";
   characterName: string;
   billingOrder: number | null;
   createdAt: string;
@@ -132,15 +132,19 @@ export const deleteLanguageApi = async (id: string): Promise<void> => {
   await httpService.delete(`/movie/delete-language/${id}`);
 };
 
-export const getMoviesApi = async (pageParam:number): Promise<MoviesPaginatedRes> => {
-  const res = await httpService.get(`/movie/get-all-movie?page=${pageParam}&limit=10`);
+export const getMoviesApi = async (
+  pageParam: number,
+): Promise<MoviesPaginatedRes> => {
+  const res = await httpService.get(
+    `/movie/get-all-movie?page=${pageParam}&limit=10`,
+  );
   return res.data.data;
 };
 
 export const createMovieApi = async (
   movieData: FormData,
 ): Promise<MovieRes> => {
-  const res = await httpService.post("/movie/add-movie", movieData,{
+  const res = await httpService.post("/movie/add-movie", movieData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
@@ -155,7 +159,12 @@ export const updateMovieApi = async ({
   id: string;
   movieData: FormData;
 }): Promise<MovieRes> => {
-  const res = await httpService.patch(`/movie/update-movie/${id}`, movieData);
+  console.log(`movie Data: ${movieData} Id:${id}`);
+  const res = await httpService.patch(`/movie/update-movie/${id}`, movieData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return res.data.data;
 };
 
@@ -163,16 +172,15 @@ export const deleteMovieApi = async (id: string): Promise<void> => {
   await httpService.delete(`/movie/delete-movie/${id}`);
 };
 
-
-export const getMovieById=async (id:string):Promise<MovieRes>=>{
-  const res=await httpService.get(`movie/get-movie/${id}`);
+export const getMovieById = async (id: string): Promise<MovieRes> => {
+  const res = await httpService.get(`movie/get-movie/${id}`);
   console.log(res);
   return res.data.data;
-}
+};
 
 // get all movie without pagination
-export const getAllMovieWithoutPagination=async ():Promise<MovieRes[]>=>{
-  const res=await httpService.get(`movie/get-all/`);
+export const getAllMovieWithoutPagination = async (): Promise<MovieRes[]> => {
+  const res = await httpService.get(`movie/get-all/`);
   console.log(res);
   return res.data.data;
-}
+};

@@ -21,7 +21,7 @@ const FeaturesSection = () => {
         </button>
       </div>
 
-      <div className="flex flex-wrap max-sm:justify-center gap-8 mt-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 mt-8">
         {movies.slice(0, 8).map((show) => (
           <MovieCard key={show.id} movie={show} />
         ))}

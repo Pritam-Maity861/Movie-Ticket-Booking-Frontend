@@ -1,17 +1,17 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { dummyDateTimeData } from "../assets/assets";
+// import { dummyDateTimeData } from "../assets/assets";
 import {
   StarIcon,
   ClockIcon,
   CalendarIcon,
   PlayIcon,
-  HeartIcon,
+  // HeartIcon,
   ArrowLeftIcon,
   TicketIcon,
 } from "lucide-react";
 import timeFormat from "../lib/timeFormat";
 import BlurBackground from "../components/BlurBackground";
-import { useState } from "react";
+// import { useState } from "react";
 import MovieCard from "../components/MovieCard";
 import { useMovieById, useMovies } from "../hooks/useMovie";
 import LoaderAnimation from "../components/LoaderAnimation";
@@ -25,18 +25,18 @@ const MovieDetails = () => {
 
   const { data: movie, isLoading, isError } = useMovieById(id as string);
   const { data: allmovies } = useMovies();
-  const [selectedDate, setSelectedDate] = useState<string | null>(
-    Object.keys(dummyDateTimeData)[0],
-  );
-  const [isFavorite, setIsFavorite] = useState(false);
+  // const [selectedDate, setSelectedDate] = useState<string | null>(
+  //   Object.keys(dummyDateTimeData)[0],
+  // );
+  // const [isFavorite, setIsFavorite] = useState(false);
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const availableDates = Object.keys(dummyDateTimeData).filter((dateStr) => {
-    const date = new Date(dateStr);
-    return date >= today;
-  });
+  // const availableDates = Object.keys(dummyDateTimeData).filter((dateStr) => {
+  //   const date = new Date(dateStr);
+  //   return date >= today;
+  // });
 
   if (isLoading) {
     return (
@@ -142,14 +142,14 @@ const MovieDetails = () => {
                   <TicketIcon className="w-4 h-5" /> Buy Tickets
                 </p>
               </button>
-              <button
+              {/* <button
                 className="p-3 bg-gray-800 hover:bg-gray-700 transition rounded-full border border-gray-600 shadow-lg shadow-primary/30 group cursor-pointer"
                 onClick={() => setIsFavorite(!isFavorite)}
               >
                 <HeartIcon
                   className={`w-5 h-5 transition ${isFavorite ? "text-primary fill-primary" : "text-gray-300 group-hover:text-primary"}`}
                 />
-              </button>
+              </button> */}
             </div>
           </div>
         </div>
@@ -200,10 +200,10 @@ const MovieDetails = () => {
                           </div>
                         </div>
                         <div className="mt-1">
-                          <h4 className="font-bold text-sm text-white truncate max-w-[120px]">
+                          <h4 className="font-bold text-sm text-white truncate max-w-30">
                             {credit.person.name}
                           </h4>
-                          <p className="text-xs text-gray-500 truncate max-w-[120px]">
+                          <p className="text-xs text-gray-500 truncate max-w-30">
                             {credit.characterName || credit.role}
                           </p>
                         </div>

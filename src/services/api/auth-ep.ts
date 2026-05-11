@@ -22,7 +22,7 @@ export interface loginResponse {
 }
 
 export interface RegisterResponse {
-  accessToken:string;
+  accessToken: string;
   user: {
     id: number;
     name: string;
@@ -45,10 +45,10 @@ export const registerApi = async (
   return { data: response.data.data };
 };
 
-export const logOutApi = async() => {
+export const logOutApi = async () => {
   await httpService.post("/auth/logout");
 };
-export const logOutAllDevicesApi = async() => {
+export const logOutAllDevicesApi = async () => {
   await httpService.post("/auth/logout-all-devices");
 };
 
@@ -68,4 +68,12 @@ export const refreshTokenApi = async () => {
   );
 
   return res.data;
+};
+export const updateProfileApi = async (data: FormData) => {
+  const response = await httpService.patch("/auth/update-profile", data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
 };
