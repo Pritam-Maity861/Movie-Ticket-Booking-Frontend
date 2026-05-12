@@ -77,3 +77,8 @@ export const updateProfileApi = async (data: FormData) => {
   });
   return response.data;
 };
+
+export const updatePasswordApi = async (data: any) => {
+  const response = await httpService.patch("/auth/update-password", data);
+  return response.data;
+};

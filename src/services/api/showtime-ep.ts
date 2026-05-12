@@ -15,19 +15,32 @@ export interface Screen {
 export interface TheaterShowtimes {
   theaterId: string;
   theaterName: string;
-  address:string;
-  city:string;
-  ratting:string
+  address: string;
+  city: string;
+  ratting: string;
   screens: Screen[];
 }
 
-export interface CreateShowTimePayload{
-  screenId:string;
-  movieId:string;
-  startTime:string;
-  vipSeatPrice:number;
-  premiumSeatPrice:number;
-  regularSeatPrice:number;
+export interface ShowtimeDetail {
+  id: string;
+  movieId: string;
+  screenId: string;
+  startTime: string;
+  endTime: string;
+  movie: {
+    id: string;
+    title: string;
+    posterUrl?: string;
+  };
+}
+
+export interface CreateShowTimePayload {
+  screenId: string;
+  movieId: string;
+  startTime: string;
+  vipSeatPrice: number;
+  premiumSeatPrice: number;
+  regularSeatPrice: number;
 }
 
 export const getShowtimesApi = async (
@@ -47,8 +60,21 @@ export const getShowtimeByIdApi = async (id: string): Promise<any> => {
   return res.data.data;
 };
 
-export const createShowtimeApi = async (payload:CreateShowTimePayload) => {
+export const createShowtimeApi = async (payload: CreateShowTimePayload) => {
   const res = await httpService.post("/showtime/create-showtime", payload);
   console.log(`created showtime data:${res}`);
   return res.data.data;
-}
+};
+
+export const getShowtimesByScreenIdApi = async (
+  screenId: string,
+): Promise<ShowtimeDetail[]> => {
+  const res = await httpService.get(
+    `/showtime/get-showtimes/screen/${screenId}`,
+  );
+  return res.data.data;
+};
+
+export const deleteShowtimeApi = async (id: string): Promise<void> => {
+  await httpService.delete(`/showtime/delete-showtime?id=${id}`);
+};

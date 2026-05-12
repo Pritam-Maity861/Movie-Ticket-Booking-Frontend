@@ -149,7 +149,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
           </div>
 
           {/* Forgot Password */}
-          {isLoginView && (
+          {/* {isLoginView && (
             <div className="flex justify-end">
               <button
                 type="button"
@@ -158,7 +158,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
                 Forgot password?
               </button>
             </div>
-          )}
+          )} */}
 
           {/* Error */}
           {errorMessage && (

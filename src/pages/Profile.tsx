@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useAuthStore } from "../store/auth-store";
-import { updateProfileApi } from "../services/api/auth-ep";
+import { updateProfileApi, updatePasswordApi } from "../services/api/auth-ep";
 import {
   User,
   Mail,
@@ -9,6 +9,7 @@ import {
   LogOut,
   ShieldCheck,
   Ticket,
+  Lock,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +18,12 @@ const Profile = () => {
   const { user, setUser, logOut } = useAuthStore();
   const [name, setName] = useState(user?.name || "");
   const [loading, setLoading] = useState(false);
+  const [passLoading, setPassLoading] = useState(false);
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
   const [previewImage, setPreviewImage] = useState<string | null>(
     user?.profilePic || null,
   );
@@ -51,6 +58,36 @@ const Profile = () => {
       toast.error(error.response?.data?.message || "Failed to update profile");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      return toast.error("New passwords do not match");
+    }
+
+    if (passwordData.newPassword.length < 6) {
+      return toast.error("Password must be at least 6 characters");
+    }
+
+    setPassLoading(true);
+    try {
+      await updatePasswordApi({
+        currentPassword: passwordData.currentPassword,
+        newPassword: passwordData.newPassword,
+      });
+      toast.success("Password updated successfully");
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Failed to update password");
+    } finally {
+      setPassLoading(false);
     }
   };
 
@@ -120,8 +157,9 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Main Form */}
-        <div className="md:col-span-2">
+        {/* Main Sections */}
+        <div className="md:col-span-2 space-y-8">
+          {/* Edit Profile Section */}
           <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
             <h3 className="text-2xl font-bold mb-8 flex items-center gap-3">
               <User className="text-primary" />
@@ -182,6 +220,110 @@ const Profile = () => {
                     <>
                       <Save size={20} />
                       Save Changes
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+
+          {/* Change Password Section */}
+          <div className="bg-white/5 border border-white/10 rounded-2xl p-8">
+            <h3 className="text-2xl font-bold mb-8 flex items-center gap-3">
+              <Lock className="text-primary" />
+              Security
+            </h3>
+
+            <form onSubmit={handlePasswordUpdate} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-white/60">
+                  Current Password
+                </label>
+                <div className="relative">
+                  <Lock
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20"
+                    size={20}
+                  />
+                  <input
+                    type="password"
+                    value={passwordData.currentPassword}
+                    onChange={(e) =>
+                      setPasswordData({
+                        ...passwordData,
+                        currentPassword: e.target.value,
+                      })
+                    }
+                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 focus:border-primary/50 focus:outline-none transition-colors"
+                    placeholder="••••••••"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-white/60">
+                    New Password
+                  </label>
+                  <div className="relative">
+                    <Lock
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20"
+                      size={20}
+                    />
+                    <input
+                      type="password"
+                      value={passwordData.newPassword}
+                      onChange={(e) =>
+                        setPasswordData({
+                          ...passwordData,
+                          newPassword: e.target.value,
+                        })
+                      }
+                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 focus:border-primary/50 focus:outline-none transition-colors"
+                      placeholder="••••••••"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-white/60">
+                    Confirm New Password
+                  </label>
+                  <div className="relative">
+                    <Lock
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20"
+                      size={20}
+                    />
+                    <input
+                      type="password"
+                      value={passwordData.confirmPassword}
+                      onChange={(e) =>
+                        setPasswordData({
+                          ...passwordData,
+                          confirmPassword: e.target.value,
+                        })
+                      }
+                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 focus:border-primary/50 focus:outline-none transition-colors"
+                      placeholder="••••••••"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  disabled={passLoading}
+                  className="w-full md:w-auto px-8 py-3 bg-primary/10 hover:bg-primary text-primary hover:text-white border border-primary/20 rounded-xl font-bold flex items-center justify-center gap-2 transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  {passLoading ? (
+                    <div className="w-5 h-5 border-2 border-white/20 border-t-white rounded-full animate-spin"></div>
+                  ) : (
+                    <>
+                      <Lock size={20} />
+                      Update Password
                     </>
                   )}
                 </button>

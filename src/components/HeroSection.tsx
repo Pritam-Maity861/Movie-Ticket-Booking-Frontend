@@ -100,7 +100,7 @@ const HeroSection = () => {
                   </span>
                 </div>
 
-                <h1 className="text-6xl md:text-8xl lg:text-[100px] font-black text-white leading-[0.95] tracking-tighter filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)] uppercase">
+                <h1 className="text-6xl md:text-8xl lg:text-[80px] font-black text-white leading-[0.95] tracking-tighter filter drop-shadow-[0_20px_50px_rgba(0,0,0,0.8)] uppercase">
                   {movie.title}
                 </h1>
 

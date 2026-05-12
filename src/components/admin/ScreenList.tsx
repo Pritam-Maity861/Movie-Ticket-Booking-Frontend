@@ -13,6 +13,7 @@ import { useDeleteScreen, useGetScreens } from "../../hooks/useScreens";
 import ScreenFormModal from "./ScreenFormModal";
 import { Button } from "@mui/material";
 import ShowTimeFormModal from "./ShowTimeFormModal";
+import ShowtimeListModal from "./ShowtimeListModal";
 
 type ScreenListProps = {
   theaterId: string;
@@ -25,6 +26,8 @@ const ScreenList = ({ theaterId, onBack }: ScreenListProps) => {
   const [openShowTimeModal, setOpenShowTimeModal] = useState(false);
 
   const [selectedScreenId, setSelectedScreenId] = useState<string | null>(null);
+  const [selectedScreenName, setSelectedScreenName] = useState<string>("");
+  const [openShowtimeListModal, setOpenShowtimeListModal] = useState(false);
 
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -143,7 +146,12 @@ const ScreenList = ({ theaterId, onBack }: ScreenListProps) => {
         {filteredScreens?.map((screen: any, index: number) => (
           <div
             key={screen.id || index}
-            className="p-5 border border-white/10 rounded-2xl backdrop-blur-xl bg-white/5 hover:bg-white/10 transition-colors relative overflow-hidden group flex justify-between items-center"
+            onClick={() => {
+              setSelectedScreenId(screen.id);
+              setSelectedScreenName(screen.name);
+              setOpenShowtimeListModal(true);
+            }}
+            className="p-5 border border-white/10 rounded-2xl backdrop-blur-xl bg-white/5 hover:bg-white/10 transition-colors relative overflow-hidden group flex justify-between items-center cursor-pointer"
           >
             <div className="flex flex-col  gap-2">
               <div>
@@ -157,7 +165,8 @@ const ScreenList = ({ theaterId, onBack }: ScreenListProps) => {
               </div>
               <div className="">
                 <button
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setSelectedScreenId(screen.id);
                     setOpenShowTimeModal(true);
                   }}
@@ -172,7 +181,10 @@ const ScreenList = ({ theaterId, onBack }: ScreenListProps) => {
             <div className="flex gap-2">
               <button
                 className="text-white/40 hover:text-white transition-colors cursor-pointer p-2 rounded-lg hover:bg-white/5"
-                onClick={() => handleToggleMenu(screen.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleToggleMenu(screen.id);
+                }}
               >
                 <MoreVertical size={20} />
               </button>
@@ -210,6 +222,17 @@ const ScreenList = ({ theaterId, onBack }: ScreenListProps) => {
             setSelectedScreenId(null);
           }}
           screenId={selectedScreenId}
+        />
+      )}
+      {selectedScreenId && (
+        <ShowtimeListModal
+          open={openShowtimeListModal}
+          onClose={() => {
+            setOpenShowtimeListModal(false);
+            setSelectedScreenId(null);
+          }}
+          screenId={selectedScreenId}
+          screenName={selectedScreenName}
         />
       )}
     </div>

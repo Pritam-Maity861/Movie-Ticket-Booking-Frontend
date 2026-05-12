@@ -14,9 +14,7 @@ const Footer = () => {
           />
 
           <p className="mt-6 text-sm">
-            Lorem Ipsum has been the industry's standard dummy text ever since
-            the 1500s, when an unknown printer took a galley of type and
-            scrambled it to make a type specimen book.
+            We are dedicated to providing the best and most seamless cinematic experience for movie enthusiasts everywhere! Catch the latest blockbusters, discover hidden gems, and book your seats in just a few clicks.
           </p>
 
           <div className="flex items-center gap-2 mt-4">
@@ -39,9 +37,7 @@ const Footer = () => {
             <ul className="text-sm space-y-2 cursor-pointer">
               <li><a onClick={()=>{navigate("/"); scrollTo(0,0)}}>Home</a></li>
               <li><a onClick={()=>{navigate("/movies"); scrollTo(0,0)}}>Movies</a></li>
-              <li><a onClick={()=>{navigate("/theaters"); scrollTo(0,0)}}>Theaters</a></li>
               <li><a  onClick={()=>{navigate("/releases"); scrollTo(0,0)}}>Releases</a></li>
-              <li><a  onClick={()=>{navigate("/favorite"); scrollTo(0,0)}}>Favorites</a></li>
               <li><a  onClick={()=>{navigate("/about-us"); scrollTo(0,0)}}>About Us</a></li>
             </ul>
           </div>
