@@ -110,19 +110,19 @@ const SeatLayout = () => {
 
       <div className="max-w-7xl mx-auto px-4 md:px-8 z-10 relative">
         {/* Header */}
-        <div className="flex items-center gap-3 md:gap-4 mb-8 md:mb-12 animate-fade-in pt-4 md:pt-0">
+        <div className="flex items-center gap-3 md:gap-4 mb-6 md:mb-10 animate-fade-in pt-4 md:pt-0">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 md:p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl md:rounded-2xl transition-colors cursor-pointer"
+            className="p-2 md:p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg md:rounded-2xl transition-colors cursor-pointer"
           >
-            <ChevronLeftIcon className="w-5 h-5 md:w-6 md:h-6" />
+            <ChevronLeftIcon className="w-4 h-4 md:w-6 md:h-6" />
           </button>
-          <div>
-            <h1 className="text-xl md:text-3xl font-black truncate max-w-[200px] md:max-w-none">
+          <div className="min-w-0">
+            <h1 className="text-xl md:text-3xl font-black truncate leading-tight">
               {showtime.movie.title}
             </h1>
-            <p className="text-gray-500 text-xs md:text-base font-bold flex items-center gap-1 md:gap-2">
-              <span className="truncate max-w-[100px] md:max-w-none">
+            <p className="text-gray-500 text-[10px] md:text-base font-bold flex items-center gap-1.5 md:gap-2">
+              <span className="truncate max-w-[120px] md:max-w-none">
                 {showtime.screen.theater.name}
               </span>{" "}
               |{" "}
@@ -136,44 +136,46 @@ const SeatLayout = () => {
 
         {/* Legend */}
         <div
-          className="flex flex-wrap justify-center gap-4 md:gap-8 mb-10 md:mb-16 animate-fade-in"
+          className="flex flex-wrap justify-center gap-3 md:gap-8 mb-8 md:mb-12 animate-fade-in"
           style={{ animationDelay: "0.1s" }}
         >
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 md:w-5 md:h-5 rounded bg-white/5 border border-white/20"></div>
-            <span className="text-[10px] md:text-xs font-bold text-gray-400">
-              Available
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 md:w-5 md:h-5 rounded bg-primary border border-primary"></div>
-            <span className="text-[10px] md:text-xs font-bold text-gray-400">
-              Selected
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 md:w-5 md:h-5 rounded bg-white/20 border border-transparent flex items-center justify-center">
-              <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-black/40 rounded-full"></div>
+          {[
+            { label: "Available", color: "bg-white/5 border-white/20" },
+            { label: "Selected", color: "bg-primary border-primary" },
+            {
+              label: "Booked",
+              color: "bg-white/20 border-transparent",
+              dot: true,
+            },
+          ].map((item) => (
+            <div key={item.label} className="flex items-center gap-2">
+              <div
+                className={`w-3.5 h-3.5 md:w-5 md:h-5 rounded-sm md:rounded ${item.color} flex items-center justify-center`}
+              >
+                {item.dot && (
+                  <div className="w-1 h-1 md:w-2 md:h-2 bg-black/40 rounded-full"></div>
+                )}
+              </div>
+              <span className="text-[10px] md:text-xs font-bold text-gray-500">
+                {item.label}
+              </span>
             </div>
-            <span className="text-[10px] md:text-xs font-bold text-gray-400">
-              Booked
-            </span>
-          </div>
+          ))}
         </div>
 
         {/* Screen Indicator */}
         <div
-          className="relative mb-16 md:mb-24 animate-fade-in"
+          className="relative mb-12 md:mb-20 animate-fade-in"
           style={{ animationDelay: "0.2s" }}
         >
-          <div className="w-full max-w-lg md:max-w-2xl mx-auto h-2 bg-primary/30 rounded-full blur-xl absolute -bottom-4 left-1/2 -translate-x-1/2"></div>
-          <div className="w-full max-w-2xl mx-auto text-center px-4 md:px-10">
+          <div className="w-full max-w-[280px] md:max-w-2xl mx-auto h-1.5 md:h-2 bg-primary/30 rounded-full blur-xl absolute -bottom-3 md:-bottom-4 left-1/2 -translate-x-1/2"></div>
+          <div className="w-full max-w-[320px] md:max-w-2xl mx-auto text-center px-4 md:px-10">
             <img
               src={assets.screenImage}
               alt="Screen"
               className="w-full opacity-60 pointer-events-none"
             />
-            <p className="text-[8px] md:text-[10px] font-black tracking-[0.3em] md:tracking-[0.5em] text-gray-600 mt-2 uppercase">
+            <p className="text-[7px] md:text-[10px] font-black tracking-[0.2em] md:tracking-[0.5em] text-gray-600 mt-1 md:mt-2 uppercase">
               All eyes this way
             </p>
           </div>
@@ -181,18 +183,18 @@ const SeatLayout = () => {
 
         {/* Seat Grid */}
         <div
-          className="flex flex-col gap-4 md:gap-8 mb-20 p-4 md:p-0 items-center overflow-x-auto pb-8 scrollbar-hide animate-fade-in"
+          className="flex flex-col gap-3 md:gap-8 mb-24 px-4 md:p-0 items-center overflow-x-auto pb-10 scrollbar-hide animate-fade-in"
           style={{ animationDelay: "0.3s" }}
         >
           {Object.entries(groupedSeats).map(([row, seats]) => (
             <div
               key={row}
-              className="flex items-center gap-3 md:gap-6 min-w-max"
+              className="flex items-center gap-4 md:gap-6 min-w-max"
             >
-              <span className="w-5 md:w-6 text-xs md:text-sm font-black text-gray-400 text-center">
+              <span className="w-4 md:w-6 text-[10px] md:text-sm font-black text-gray-500 text-center">
                 {row}
               </span>
-              <div className="flex gap-1.5 md:gap-3 pt-2">
+              <div className="flex gap-1.5 md:gap-3 pt-1">
                 {seats.map((seat) => {
                   const selected = selectedSeats.includes(seat.id);
                   const booked = isBooked(seat.id);
@@ -203,7 +205,7 @@ const SeatLayout = () => {
                       disabled={booked}
                       onClick={() => toggleSeatSelection(seat.id)}
                       className={`
-                        w-7 h-7 md:w-10 md:h-10 rounded-md md:rounded-xl flex items-center justify-center transition-all duration-300 relative group cursor-pointer
+                        w-6 h-6 md:w-10 md:h-10 rounded md:rounded-xl flex items-center justify-center transition-all duration-300 relative group cursor-pointer
                         ${
                           booked
                             ? "bg-white/10 cursor-not-allowed"
@@ -214,10 +216,10 @@ const SeatLayout = () => {
                       `}
                     >
                       {booked ? (
-                        <div className="w-1.5 h-1.5 md:w-2 md:h-2 bg-white/20 rounded-full"></div>
+                        <div className="w-1 md:w-2 h-1 md:h-2 bg-white/10 rounded-full"></div>
                       ) : (
                         <span
-                          className={`text-[8px] md:text-[10px] font-bold ${selected ? "opacity-100" : "opacity-80 group-hover:opacity-100"}`}
+                          className={`text-[7px] md:text-[10px] font-bold ${selected ? "opacity-100" : "opacity-80 group-hover:opacity-100"}`}
                         >
                           {seat.number}
                         </span>
@@ -234,7 +236,7 @@ const SeatLayout = () => {
                   );
                 })}
               </div>
-              <span className="w-5 md:w-6 text-xs md:text-sm font-black text-gray-400 text-center">
+              <span className="w-4 md:w-6 text-[10px] md:text-sm font-black text-gray-500 text-center">
                 {row}
               </span>
             </div>
@@ -242,19 +244,22 @@ const SeatLayout = () => {
         </div>
 
         {/* Pricing Info */}
-        <div className="max-w-xl mx-auto flex justify-between gap-2 md:gap-4 mb-20 text-[8px] md:text-[10px] font-black uppercase tracking-wider md:tracking-widest text-gray-500">
-          <div className="flex items-center gap-1.5">
-            <div className="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-yellow-500"></div>{" "}
-            VIP: ₹{getSeatPrice("VIP")}
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-blue-500"></div>{" "}
-            Premium: ₹{getSeatPrice("PREMIUM")}
-          </div>
-          <div className="flex items-center gap-1.5">
-            <div className="w-1 md:w-1.5 h-1 md:h-1.5 rounded-full bg-gray-600"></div>{" "}
-            Regular: ₹{getSeatPrice("REGULAR")}
-          </div>
+        <div className="max-w-md mx-auto flex justify-between gap-1 mb-24 px-4 text-[7px] md:text-[10px] font-black uppercase tracking-wider md:tracking-widest text-gray-600">
+          {[
+            { type: "VIP", color: "bg-yellow-500" },
+            { type: "PREMIUM", color: "bg-blue-500" },
+            { type: "REGULAR", color: "bg-gray-700" },
+          ].map((pricing) => (
+            <div
+              key={pricing.type}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded bg-white/5 border border-white/5"
+            >
+              <div
+                className={`w-1 md:w-1.5 h-1 md:h-1.5 rounded-full ${pricing.color}`}
+              ></div>{" "}
+              {pricing.type}: ₹{getSeatPrice(pricing.type)}
+            </div>
+          ))}
         </div>
       </div>
 
@@ -262,38 +267,51 @@ const SeatLayout = () => {
       <div
         className={`fixed bottom-0 left-0 right-0 z-50 transition-transform duration-500 transform ${selectedSeats.length > 0 ? "translate-y-0" : "translate-y-full"}`}
       >
-        <div className="bg-black/90 backdrop-blur-3xl border-t border-white/10 px-4 py-4 md:px-12 md:py-6">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 md:gap-6">
-            <div className="flex-1 w-full md:w-auto">
-              <div className="flex flex-wrap gap-1.5 mb-2 md:mb-2">
+        {/* Mobile Backdrop Overlay */}
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-2xl md:hidden"></div>
+
+        <div className="bg-black/90 md:bg-black/80 backdrop-blur-3xl border-t border-white/10 px-4 py-4 md:px-12 md:py-6 relative z-10">
+          <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8">
+            <div className="flex-1 w-full md:w-auto overflow-hidden">
+              <div className="flex gap-2 overflow-x-auto scrollbar-hide mb-2 md:mb-3 pb-1">
                 {selectedSeatDetails.map((seat) => (
                   <span
                     key={seat.id}
-                    className="px-2 md:px-3 py-0.5 md:py-1 bg-primary/10 border border-primary/20 rounded-full text-[10px] md:text-xs font-black text-primary"
+                    className="px-2.5 md:px-3 py-0.5 md:py-1 bg-primary/10 border border-primary/20 rounded-full text-[9px] md:text-xs font-black text-primary whitespace-nowrap"
                   >
                     {seat.row}
                     {seat.number}
                   </span>
                 ))}
               </div>
-              <p className="text-gray-500 text-[10px] md:text-xs font-bold uppercase tracking-widest flex items-center gap-2">
-                <TicketIcon className="w-3.5 h-3.5 md:w-4 md:h-4" />{" "}
-                {selectedSeats.length} Ticket
-                {selectedSeats.length > 1 ? "s" : ""} Selected
-              </p>
+              <div className="flex items-center justify-between md:justify-start gap-4">
+                <p className="text-gray-500 text-[9px] md:text-xs font-bold uppercase tracking-widest md:tracking-widest flex items-center gap-2">
+                  <TicketIcon className="w-3.5 h-3.5 md:w-4 md:h-4 text-primary" />{" "}
+                  {selectedSeats.length} Ticket
+                  {selectedSeats.length > 1 ? "s" : ""}
+                </p>
+                <div className="md:hidden text-right">
+                  <h4 className="text-xl font-black text-primary leading-none">
+                    ₹{totalPrice}
+                  </h4>
+                  <p className="text-[7px] text-gray-600 font-bold uppercase mt-1">
+                    Total Payable
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div className="flex items-center justify-between md:justify-end gap-6 md:gap-8 w-full md:w-auto">
-              <div className="text-left md:text-right">
-                <p className="text-[10px] md:text-xs text-gray-500 font-bold uppercase tracking-widest mb-0.5 md:mb-1">
+            <div className="flex items-center justify-between md:justify-end gap-6 md:gap-8 w-full md:w-auto border-t border-white/5 md:border-0 pt-4 md:pt-0">
+              <div className="hidden md:block text-right">
+                <p className="text-[10px] md:text-xs text-gray-500 font-bold uppercase tracking-widest mb-1">
                   Total Payable
                 </p>
-                <h4 className="text-2xl md:text-3xl font-black text-primary">
+                <h4 className="text-3xl font-black text-primary">
                   ₹{totalPrice}
                 </h4>
               </div>
               <button
-                className="flex-1 md:flex-none px-6 md:px-10 py-3 md:py-4 bg-primary hover:bg-primary-dull text-white rounded-xl md:rounded-2xl font-black flex items-center justify-center gap-2 md:gap-3 shadow-xl md:shadow-2xl shadow-primary/30 transition-all active:scale-95 cursor-pointer text-sm md:text-base"
+                className="flex-1 md:flex-none w-full md:w-[240px] px-8 py-3.5 md:py-5 bg-primary hover:bg-primary-dull text-white rounded-xl md:rounded-2xl font-black flex items-center justify-center gap-2 md:gap-3 shadow-xl md:shadow-2xl shadow-primary/30 transition-all active:scale-95 cursor-pointer text-sm md:text-base uppercase tracking-widest"
                 onClick={async () => {
                   try {
                     setIsProcessing(true);
@@ -316,8 +334,10 @@ const SeatLayout = () => {
                 }}
                 disabled={isProcessing}
               >
-                {isProcessing ? "PROCESSING..." : "PROCEED"}{" "}
-                <ShoppingBagIcon className="w-4 h-4 md:w-5 md:h-5" />
+                {isProcessing ? "PROCESSING..." : "PROCEED"}
+                {!isProcessing && (
+                  <ShoppingBagIcon className="w-4 h-4 md:w-5 md:h-5 " />
+                )}
               </button>
             </div>
           </div>

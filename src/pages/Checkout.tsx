@@ -352,7 +352,7 @@ const Checkout = () => {
               </div>
 
               <button
-                className="w-full py-5 bg-primary hover:bg-primary-dull text-white rounded-[2rem] font-black flex items-center justify-center gap-3 shadow-2xl shadow-primary/30 transition-all active:scale-95 group overflow-hidden relative cursor-pointer"
+                className="w-full py-5 bg-primary hover:bg-primary-dull text-white rounded-4xl font-black flex items-center justify-center gap-3 shadow-2xl shadow-primary/30 transition-all active:scale-95 group overflow-hidden relative cursor-pointer"
                 onClick={handlePayment}
               >
                 <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-700 skew-x-[-20deg]"></div>
