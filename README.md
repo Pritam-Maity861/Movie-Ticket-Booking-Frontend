@@ -1,73 +1,84 @@
-# React + TypeScript + Vite
+# 🎬 Cinema Ticketing & Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 
-Currently, two official plugins are available:
+A premium, full-stack movie booking platform featuring real-time seat selection, secure payments, and a comprehensive admin dashboard.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 🔗 Live Demo
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+**Check out the live application here:** [Live Demo Link](https://your-live-link-here.com)
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## ✨ Features
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### 👤 User Interface
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- **Responsive Movie Gallery:** Interactive grid with movie trailers and detailed descriptions.
+- **Dynamic Booking Engine:** Real-time seat selection and availability tracking.
+- **Secure Payments:** Integrated with **Razorpay** for a smooth checkout experience.
+- **E-Tickets:** Instant **PDF ticket generation** with unique **QR Codes**.
+- **Booking History:** User dashboard to manage and download previous tickets.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 🔐 Admin Dashboard
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+- **Theater Management:** Full control over theaters, screens, and seating layouts.
+- **Showtime Scheduling:** Visual interface to manage movie times and prevent scheduling conflicts.
+- **Movie Inventory:** Upload posters to **Cloudinary** and manage movie metadata.
+- **Payment tracking:** Monitor revenue and booking statuses through a dedicated analytics pane.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## 🛠️ Tech Stack
+
+- **Frontend:** React 19, Vite, Tailwind CSS v4, Material UI, TanStack Query, Zustand
+- **Backend:** Node.js, Express, TypeScript, Zod (Validation)
+- **Database:** PostgreSQL (via Prisma ORM), Redis (Caching), MongoDB
+- **Services:** Razorpay (Payments), Cloudinary (Media), Clerk (Auth)
+
+---
+
+## 📸 Screenshots
+
+### 👤 User Experience
+| Hero Section | Trailer Section |
+|     ![Hero Section](./public/hero_section.png)      |          ![Trailer Section](./public/trailer_section.png)          | 
+| Admin Panel Dashboard | Ticket pdf |
+| ![Admin Panel Dashboard](./public/admin_pannel_dashboard.png) | ![Ticket pdf](./public/ticket_pdf.png) |
+| All Movies View | Movie Details Page |
+| :---: | :---: |
+| ![All Movies](./public/all_movies.png) | ![Movie Details](./public/movie_details.png) |
+
+| Booking Flow | Seat Layout |
+| :---: | :---: |
+| ![Booking Flow](./public/booking_flow.png) | ![Seat Layout](./public/seat_layout.png) |
+
+| Checkout Page | My Bookings |
+| :---: | :---: |
+| ![Checkout](./public/checkout_page.png) | ![My Bookings](./public/my_booking.png) |
+
+| Profile Management | |
+| :---: | :---: |
+| ![Profile](./public/profile_management.png) | |
+
+### 🔐 Admin Panel
+| All Bookings Management | Movie Management |
+| :---: | :---: |
+| ![All Bookings](./public/All_bookings.png) | ![Movie Management](./public/movie_management.png) |
+
+| Theater Management | |
+| :---: | :---: |
+| ![Theater Management](./public/theater_management.png) | |
+
+
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
