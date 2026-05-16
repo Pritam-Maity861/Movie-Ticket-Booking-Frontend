@@ -2,7 +2,7 @@ import { Edit, List, MoreVertical, Trash2 } from "lucide-react";
 import { useDeleteMovie, useMovies } from "../../hooks/useMovie";
 import LoaderAnimation from "../LoaderAnimation";
 import { useEffect, useRef, useState } from "react";
-import toast from "react-hot-toast";
+// import toast from "react-hot-toast";
 import MovieFormModal from "./MovieFormModal";
 
 const MovieList = () => {
@@ -24,7 +24,7 @@ const MovieList = () => {
   const handleToggleMenu = (id: string) => {
     setOpenMenuId((prev) => (prev === id ? null : id));
   };
-  console.log(data);
+  // console.log(data);
   const observerRef = useRef(null);
   const [open, setOpen] = useState(false);
   const [selectedMovie, setSelectedMovie] = useState<any>(null);
@@ -86,10 +86,10 @@ const MovieList = () => {
         return;
       }
       await deleteMovie(id);
-      toast.success("Movie Deleted Successfully");
+      // toast.success("Movie Deleted Successfully");
     } catch (error) {
       console.log(error);
-      toast.error("Failed to delete movie");
+      // toast.error("Failed to delete movie");
     }
   };
   return (

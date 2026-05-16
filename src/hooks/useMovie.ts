@@ -20,6 +20,7 @@ import {
   getMovieById,
   getAllMovieWithoutPagination,
 } from "../services/api/movie-ep";
+import toast from "react-hot-toast";
 
 export const useGenres = () => {
   return useQuery({
@@ -119,10 +120,20 @@ export const useCreateMovie = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createMovieApi,
-    onSuccess: () => {
+    onSuccess: (response: any) => {
+      toast.success(response.message || "Movie created successfully");
       queryClient.invalidateQueries({
         queryKey: ["getMovies", "getMoviesWithoutPagination"],
       });
+    },
+    onError: (error: any) => {
+      const validationErrors = error.response?.data?.errors;  
+      if (validationErrors && Array.isArray(validationErrors)) {
+        toast.error(`${validationErrors[0].path[0]}: ${validationErrors[0].message}`);
+      } else {
+        const serverMsg = error.response?.data?.message;
+        toast.error(serverMsg || "An unexpected error occurred");
+      }
     },
   });
 };
@@ -131,8 +142,18 @@ export const useUpdateMovie = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: updateMovieApi,
-    onSuccess: () => {
+    onSuccess: (response: any) => {
+      toast.success(response.message || "Movie updated successfully");
       queryClient.invalidateQueries({ queryKey: ["getMovies"] });
+    },
+    onError: (error: any) => {
+      const validationErrors = error.response?.data?.errors; 
+      if (validationErrors && Array.isArray(validationErrors)) {
+        toast.error(`${validationErrors[0].path[0]}: ${validationErrors[0].message}`);
+      } else {
+        const serverMsg = error.response?.data?.message;
+        toast.error(serverMsg || "An unexpected error occurred");
+      }
     },
   });
 };
@@ -141,8 +162,18 @@ export const useDeleteMovie = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => deleteMovieApi(id),
-    onSuccess: () => {
+    onSuccess: (response: any) => {
+      toast.success(response.message || "Movie deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["getMovies"] });
+    },
+    onError: (error: any) => {
+      const validationErrors = error.response?.data?.errors; 
+      if (validationErrors && Array.isArray(validationErrors)) {
+        toast.error(`${validationErrors[0].path[0]}: ${validationErrors[0].message}`);
+      } else {
+        const serverMsg = error.response?.data?.message;
+        toast.error(serverMsg || "An unexpected error occurred");
+      }
     },
   });
 };

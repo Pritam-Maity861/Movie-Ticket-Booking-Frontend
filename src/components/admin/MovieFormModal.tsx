@@ -23,7 +23,7 @@ import {
   useLanguages,
   useUpdateMovie,
 } from "../../hooks/useMovie";
-import toast from "react-hot-toast";
+// import toast from "react-hot-toast";
 
 type MovieModalProps = {
   open: boolean;
@@ -168,13 +168,10 @@ const MovieFormModal = ({
 
     mutation
       .then(() => {
-        toast.success(
-          isEdit ? "Movie updated successfully" : "Movie created successfully",
-        );
         onClose();
       })
-      .catch(() => {
-        toast.error(isEdit ? "Update failed" : "Creation failed");
+      .catch((err) => {
+        console.error("Mutation failed:", err);
       });
 
     // movieCreation.mutate(formData, {
