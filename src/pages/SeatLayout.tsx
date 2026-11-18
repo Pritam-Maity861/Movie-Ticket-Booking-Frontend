@@ -6,6 +6,7 @@ import {
   InfoIcon,
   TicketIcon,
   ShoppingBagIcon,
+  LockIcon,
 } from "lucide-react";
 import LoaderAnimation from "../components/LoaderAnimation";
 import BlurBackground from "../components/BlurBackground";
@@ -36,13 +37,21 @@ const SeatLayout = () => {
     return groups;
   }, [showtime]);
 
-  // Check if seat is booked
-  const isBooked = (seatId: string) => {
+  // Check if seat is permanently booked (confirmed in DB)
+  const isSeatBooked = (seatId: string) => {
+    if (showtime?.bookedSeatIds?.includes(seatId)) return true;
+    return showtime?.bookingSeats?.some((bs: any) => {
+      return bs.seatId === seatId && bs.booking?.status === "CONFIRMED";
+    });
+  };
+
+  // Check if seat is temporarily locked (in checkout hold via Redis or DB pending)
+  const isSeatLocked = (seatId: string) => {
+    if (isSeatBooked(seatId)) return false;
+    if (showtime?.lockedSeatIds?.includes(seatId)) return true;
     return showtime?.bookingSeats?.some((bs: any) => {
       if (bs.seatId !== seatId) return false;
-      if (bs.booking.status === "CONFIRMED") return true;
-      if (bs.booking.status === "PENDING") {
-        // If it's PENDING, check if it's still before expiry
+      if (bs.booking?.status === "PENDING") {
         return new Date(bs.booking.expiresAt) > new Date();
       }
       return false;
@@ -57,7 +66,16 @@ const SeatLayout = () => {
   };
 
   const toggleSeatSelection = (seatId: string) => {
-    if (isBooked(seatId)) return;
+    if (isSeatBooked(seatId)) {
+      toast.error("This seat is already booked.");
+      return;
+    }
+    if (isSeatLocked(seatId)) {
+      toast("This seat is temporarily locked in checkout by another user.", {
+        icon: "🔒",
+      });
+      return;
+    }
     setSelectedSeats((prev) =>
       prev.includes(seatId)
         ? prev.filter((id) => id !== seatId)
@@ -140,11 +158,16 @@ const SeatLayout = () => {
           style={{ animationDelay: "0.1s" }}
         >
           {[
-            { label: "Available", color: "bg-white/5 border-white/20" },
-            { label: "Selected", color: "bg-primary border-primary" },
+            { label: "Available", color: "bg-white/5 border border-white/20" },
+            { label: "Selected", color: "bg-primary border border-primary" },
             {
-              label: "Booked",
-              color: "bg-white/20 border-transparent",
+              label: "Locked (In Checkout)",
+              color: "bg-amber-500/20 border border-amber-500/60 text-amber-400",
+              icon: <LockIcon className="w-2 md:w-3 h-2 md:h-3 text-amber-400" />,
+            },
+            {
+              label: "Booked (Sold)",
+              color: "bg-zinc-900 border border-zinc-800 text-zinc-600",
               dot: true,
             },
           ].map((item) => (
@@ -152,11 +175,13 @@ const SeatLayout = () => {
               <div
                 className={`w-3.5 h-3.5 md:w-5 md:h-5 rounded-sm md:rounded ${item.color} flex items-center justify-center`}
               >
-                {item.dot && (
-                  <div className="w-1 h-1 md:w-2 md:h-2 bg-black/40 rounded-full"></div>
-                )}
+                {item.icon ? (
+                  item.icon
+                ) : item.dot ? (
+                  <div className="w-1 h-1 md:w-1.5 md:h-1.5 bg-zinc-600 rounded-full"></div>
+                ) : null}
               </div>
-              <span className="text-[10px] md:text-xs font-bold text-gray-500">
+              <span className="text-[10px] md:text-xs font-bold text-gray-400">
                 {item.label}
               </span>
             </div>
@@ -197,26 +222,41 @@ const SeatLayout = () => {
               <div className="flex gap-1.5 md:gap-3 pt-1">
                 {seats.map((seat) => {
                   const selected = selectedSeats.includes(seat.id);
-                  const booked = isBooked(seat.id);
+                  const booked = isSeatBooked(seat.id);
+                  const locked = isSeatLocked(seat.id);
+                  const isDisabled = booked || locked;
 
                   return (
                     <button
                       key={seat.id}
-                      disabled={booked}
+                      disabled={isDisabled}
                       onClick={() => toggleSeatSelection(seat.id)}
+                      title={
+                        booked
+                          ? `Seat ${row}${seat.number} - Booked (Sold)`
+                          : locked
+                            ? `Seat ${row}${seat.number} - Locked (Checkout in progress)`
+                            : selected
+                              ? `Seat ${row}${seat.number} - Selected (₹${getSeatPrice(seat.type)})`
+                              : `Seat ${row}${seat.number} - Available (₹${getSeatPrice(seat.type)})`
+                      }
                       className={`
                         w-6 h-6 md:w-10 md:h-10 rounded md:rounded-xl flex items-center justify-center transition-all duration-300 relative group cursor-pointer
                         ${
                           booked
-                            ? "bg-white/10 cursor-not-allowed"
-                            : selected
-                              ? "bg-primary text-white shadow-lg shadow-primary/30 scale-110"
-                              : "bg-white/5 border border-white/10 hover:border-primary/50 hover:bg-primary/5 hover:scale-105"
+                            ? "bg-zinc-900 border border-zinc-800/80 text-zinc-600 cursor-not-allowed opacity-60"
+                            : locked
+                              ? "bg-amber-500/15 border border-amber-500/40 text-amber-400 cursor-not-allowed shadow-[0_0_8px_rgba(245,158,11,0.2)]"
+                              : selected
+                                ? "bg-primary text-white shadow-lg shadow-primary/30 scale-110 border border-primary"
+                                : "bg-white/5 border border-white/10 hover:border-primary/50 hover:bg-primary/5 hover:scale-105 text-white"
                         }
                       `}
                     >
                       {booked ? (
-                        <div className="w-1 md:w-2 h-1 md:h-2 bg-white/10 rounded-full"></div>
+                        <div className="w-1 md:w-1.5 h-1 md:h-1.5 bg-zinc-600 rounded-full"></div>
+                      ) : locked ? (
+                        <LockIcon className="w-2.5 h-2.5 md:w-3.5 md:h-3.5 text-amber-400" />
                       ) : (
                         <span
                           className={`text-[7px] md:text-[10px] font-bold ${selected ? "opacity-100" : "opacity-80 group-hover:opacity-100"}`}
@@ -225,8 +265,8 @@ const SeatLayout = () => {
                         </span>
                       )}
 
-                      {/* Seat Type Indicator (Subtle dot at top) */}
-                      {!booked && !selected && (
+                      {/* Seat Type Indicator (Subtle dot at top for available seats) */}
+                      {!isDisabled && !selected && (
                         <div
                           className={`absolute -top-0.5 md:-top-1 right-1/2 translate-x-1/2 w-0.5 md:w-1 h-0.5 md:h-1 rounded-full 
                           ${seat.type === "VIP" ? "bg-yellow-500" : seat.type === "PREMIUM" ? "bg-blue-500" : "bg-transparent"}`}
