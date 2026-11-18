@@ -10,6 +10,8 @@ import {
   ShieldCheck,
   Ticket,
   Lock,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +26,9 @@ const Profile = () => {
     newPassword: "",
     confirmPassword: "",
   });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(
     user?.profilePic || null,
   );
@@ -245,7 +250,7 @@ const Profile = () => {
                     size={20}
                   />
                   <input
-                    type="password"
+                    type={showCurrentPassword ? "text" : "password"}
                     value={passwordData.currentPassword}
                     onChange={(e) =>
                       setPasswordData({
@@ -253,10 +258,19 @@ const Profile = () => {
                         currentPassword: e.target.value,
                       })
                     }
-                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 focus:border-primary/50 focus:outline-none transition-colors"
+                    className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-11 focus:border-primary/50 focus:outline-none transition-colors"
                     placeholder="••••••••"
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrentPassword((prev) => !prev)}
+                    disabled={passLoading}
+                    aria-label={showCurrentPassword ? "Hide current password" : "Show current password"}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors cursor-pointer p-0.5 focus:outline-none disabled:opacity-50"
+                  >
+                    {showCurrentPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
               </div>
 
@@ -271,7 +285,7 @@ const Profile = () => {
                       size={20}
                     />
                     <input
-                      type="password"
+                      type={showNewPassword ? "text" : "password"}
                       value={passwordData.newPassword}
                       onChange={(e) =>
                         setPasswordData({
@@ -279,10 +293,19 @@ const Profile = () => {
                           newPassword: e.target.value,
                         })
                       }
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 focus:border-primary/50 focus:outline-none transition-colors"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-11 focus:border-primary/50 focus:outline-none transition-colors"
                       placeholder="••••••••"
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword((prev) => !prev)}
+                      disabled={passLoading}
+                      aria-label={showNewPassword ? "Hide new password" : "Show new password"}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors cursor-pointer p-0.5 focus:outline-none disabled:opacity-50"
+                    >
+                      {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
                   </div>
                 </div>
 
@@ -296,7 +319,7 @@ const Profile = () => {
                       size={20}
                     />
                     <input
-                      type="password"
+                      type={showConfirmPassword ? "text" : "password"}
                       value={passwordData.confirmPassword}
                       onChange={(e) =>
                         setPasswordData({
@@ -304,10 +327,19 @@ const Profile = () => {
                           confirmPassword: e.target.value,
                         })
                       }
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 focus:border-primary/50 focus:outline-none transition-colors"
+                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-11 focus:border-primary/50 focus:outline-none transition-colors"
                       placeholder="••••••••"
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                      disabled={passLoading}
+                      aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors cursor-pointer p-0.5 focus:outline-none disabled:opacity-50"
+                    >
+                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
                   </div>
                 </div>
               </div>

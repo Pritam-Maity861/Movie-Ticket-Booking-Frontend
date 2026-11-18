@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { XIcon } from "lucide-react";
+import { XIcon, EyeIcon, EyeOffIcon } from "lucide-react";
 import { useLogin, useRegister } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
@@ -19,6 +19,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   if (!isOpen) return null;
 
@@ -28,10 +29,12 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     setName("");
     setEmail("");
     setPassword("");
+    setShowPassword(false);
   };
   const resetLoginForm = () => {
     setEmail("");
     setPassword("");
+    setShowPassword(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -137,15 +140,30 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
               Password
             </label>
 
-            <input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={isLoading}
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all disabled:opacity-50"
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
+                className="w-full pl-4 pr-11 py-3 bg-gray-800 border border-gray-700 rounded-xl text-white outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all disabled:opacity-50"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                disabled={isLoading}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors cursor-pointer p-0.5 focus:outline-none disabled:opacity-50"
+              >
+                {showPassword ? (
+                  <EyeOffIcon className="w-5 h-5" />
+                ) : (
+                  <EyeIcon className="w-5 h-5" />
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Forgot Password */}
@@ -191,7 +209,10 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
           <button
             disabled={isLoading}
-            onClick={() => setIsLoginView(!isLoginView)}
+            onClick={() => {
+              setIsLoginView(!isLoginView);
+              setShowPassword(false);
+            }}
             className="text-primary hover:text-primary-dull font-semibold transition-colors focus:outline-none cursor-pointer disabled:opacity-50"
           >
             {isLoginView ? "Sign up" : "Login"}
