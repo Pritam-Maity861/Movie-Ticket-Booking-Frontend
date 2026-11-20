@@ -16,6 +16,7 @@ import {
   ChevronLeft,
   LogOut,
   Users,
+  ClipboardCheck,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 
@@ -94,6 +95,11 @@ const menuItems: MenuItem[] = [
         icon: <CreditCard size={18} />,
       },
     ],
+  },
+  {
+    text: "Approvals",
+    icon: <ClipboardCheck size={20} />,
+    path: "/admin-dashboard/approvals",
   },
   {
     text: "Users",

@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useShowtimeById } from "../hooks/useShowtime";
+import { useAuthStore } from "../store/auth-store";
 import {
   ChevronLeftIcon,
   InfoIcon,
@@ -17,6 +18,8 @@ import toast from "react-hot-toast";
 const SeatLayout = () => {
   const { showtimeId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { isAuthenticated } = useAuthStore();
   const {
     data: showtime,
     isLoading,
@@ -353,6 +356,14 @@ const SeatLayout = () => {
               <button
                 className="flex-1 md:flex-none w-full md:w-[240px] px-8 py-3.5 md:py-5 bg-primary hover:bg-primary-dull text-white rounded-xl md:rounded-2xl font-black flex items-center justify-center gap-2 md:gap-3 shadow-xl md:shadow-2xl shadow-primary/30 transition-all active:scale-95 cursor-pointer text-sm md:text-base uppercase tracking-widest"
                 onClick={async () => {
+                  if (!isAuthenticated) {
+                    toast("Please sign in to proceed with your booking", {
+                      icon: "🔒",
+                    });
+                    navigate("/login", { state: { from: location } });
+                    return;
+                  }
+
                   try {
                     setIsProcessing(true);
                     const response = await createPendingBooking({

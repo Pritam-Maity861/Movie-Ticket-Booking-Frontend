@@ -9,10 +9,14 @@ import {
   deleteShowtimeApi,
 } from "../services/api/showtime-ep";
 
-export const useShowtimes = (movieId: string, date: string) => {
+export const useShowtimes = (
+  movieId: string,
+  date: string,
+  theaterId?: string,
+) => {
   return useQuery({
-    queryKey: ["showtimes", movieId, date],
-    queryFn: () => getShowtimesApi(movieId, date),
+    queryKey: ["showtimes", movieId, date, theaterId],
+    queryFn: () => getShowtimesApi(movieId, date, theaterId),
     enabled: !!movieId && !!date,
   });
 };

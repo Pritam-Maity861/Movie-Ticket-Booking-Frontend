@@ -46,17 +46,44 @@ export interface CreateShowTimePayload {
 export const getShowtimesApi = async (
   movieId: string,
   date: string,
+  theaterId?: string,
 ): Promise<TheaterShowtimes[]> => {
-  const res = await httpService.post("/showtime/get-showtimes", {
-    movieId,
-    date,
-  });
+  const params: Record<string, string> = { movieId, date };
+  if (theaterId) params.theaterId = theaterId;
+  const res = await httpService.get("/showtime", { params });
   return res.data.data;
 };
 
 export const getShowtimeByIdApi = async (id: string): Promise<any> => {
-  const res = await httpService.get(`/showtime/get-showtime/${id}`);
-  console.log(res.data);
+  const res = await httpService.get(`/showtime/${id}`);
+  return res.data.data;
+};
+
+export interface ShowtimeSeat {
+  seatId: string;
+  row: string;
+  number: number;
+  type: string;
+  price: number;
+  status: "AVAILABLE" | "HELD" | "BOOKED";
+}
+
+export interface ShowtimeSeatAvailability {
+  showtimeId: string;
+  movieId: string;
+  theaterName: string;
+  screenName: string;
+  startTime: string;
+  endTime: string;
+  totalSeats: number;
+  availableSeatsCount: number;
+  seats: ShowtimeSeat[];
+}
+
+export const getShowtimeSeatsApi = async (
+  showtimeId: string,
+): Promise<ShowtimeSeatAvailability> => {
+  const res = await httpService.get(`/showtime/${showtimeId}/seats`);
   return res.data.data;
 };
 

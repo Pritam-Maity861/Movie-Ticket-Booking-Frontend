@@ -126,14 +126,39 @@ const Navbar = () => {
               {isProfileDropdownOpen && (
                 <div className="absolute right-0 mt-3 w-56 bg-[#0f0f11] border border-gray-800 rounded-xl shadow-2xl py-2 z-50 overflow-hidden backdrop-blur-md">
                   <div className="px-4 py-3 border-b border-gray-800 bg-white/5">
-                    <p className="text-sm text-white font-semibold truncate leading-tight">
-                      {user?.name || "User"}
-                    </p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm text-white font-semibold truncate leading-tight">
+                        {user?.name || "User"}
+                      </p>
+                      {user?.role && user.role !== "USER" && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider bg-primary/20 text-primary border border-primary/30">
+                          {user.role === "THEATER_OWNER" ? "Theater Owner" : user.role}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-xs text-gray-400 truncate mt-1">
                       {user?.email || "user@example.com"}
                     </p>
                   </div>
                   <div className="py-2">
+                    {user?.role === "THEATER_OWNER" && (
+                      <Link
+                        to="/theater-owner-dashboard"
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                        className="block px-4 py-2 text-sm text-amber-400 font-medium hover:bg-white/10 hover:text-amber-300 transition"
+                      >
+                        🏛️ Theater Owner Dashboard
+                      </Link>
+                    )}
+                    {(user?.role === "ADMIN" || user?.role === "SUPER_ADMIN") && (
+                      <Link
+                        to="/admin-dashboard"
+                        onClick={() => setIsProfileDropdownOpen(false)}
+                        className="block px-4 py-2 text-sm text-primary font-medium hover:bg-white/10 hover:text-primary transition"
+                      >
+                        ⚡ Admin Dashboard
+                      </Link>
+                    )}
                     <Link
                       to="/profile"
                       onClick={() => setIsProfileDropdownOpen(false)}

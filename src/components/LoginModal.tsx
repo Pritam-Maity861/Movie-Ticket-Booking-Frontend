@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { XIcon, EyeIcon, EyeOffIcon } from "lucide-react";
+import { XIcon, EyeIcon, EyeOffIcon, Ticket, Building2 } from "lucide-react";
 import { useLogin, useRegister } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-
+import { useAuthStore } from "../store/auth-store";
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -11,7 +11,7 @@ interface LoginModalProps {
 
 const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [isLoginView, setIsLoginView] = useState(true);
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
   const loginMutation = useLogin();
   const registerMutation = useRegister();
@@ -19,6 +19,7 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState<"USER" | "THEATER_OWNER">("USER");
   const [showPassword, setShowPassword] = useState(false);
 
   if (!isOpen) return null;
@@ -29,12 +30,22 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
     setName("");
     setEmail("");
     setPassword("");
+    setRole("USER");
     setShowPassword(false);
   };
   const resetLoginForm = () => {
     setEmail("");
     setPassword("");
     setShowPassword(false);
+  };
+
+  const handlePostAuthRedirect = () => {
+    const currentUser = useAuthStore.getState().user;
+    if (currentUser?.role === "THEATER_OWNER") {
+      navigate("/theater-owner-dashboard");
+    } else if (currentUser?.role === "ADMIN" || currentUser?.role === "SUPER_ADMIN") {
+      navigate("/admin-dashboard");
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -47,18 +58,18 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
           onSuccess: () => {
             resetLoginForm();
             onClose();
-            navigate("/")
+            handlePostAuthRedirect();
           },
         }
       );
     } else {
       registerMutation.mutate(
-        { name, email, password },
+        { name, email, password, role },
         {
           onSuccess: () => {
             resetRegisterForm();
             onClose();
-            navigate("/")
+            handlePostAuthRedirect();
           },
         }
       );
@@ -97,6 +108,64 @@ const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
 
         {/* Form */}
         <form className="space-y-4" onSubmit={handleSubmit}>
+
+          {/* Account Type Selection (Sign Up only) */}
+          {!isLoginView && (
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-gray-300 block">
+                Account Type
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setRole("USER")}
+                  className={`flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                    role === "USER"
+                      ? "bg-primary/10 border-primary text-white"
+                      : "bg-gray-800/60 border-gray-700 text-gray-400 hover:text-white"
+                  }`}
+                >
+                  <div
+                    className={`p-1.5 rounded-lg ${
+                      role === "USER"
+                        ? "bg-primary text-white"
+                        : "bg-gray-700 text-gray-400"
+                    }`}
+                  >
+                    <Ticket className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-semibold">Moviegoer</div>
+                    <div className="text-[10px] text-gray-400">Book tickets</div>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setRole("THEATER_OWNER")}
+                  className={`flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
+                    role === "THEATER_OWNER"
+                      ? "bg-primary/10 border-primary text-white"
+                      : "bg-gray-800/60 border-gray-700 text-gray-400 hover:text-white"
+                  }`}
+                >
+                  <div
+                    className={`p-1.5 rounded-lg ${
+                      role === "THEATER_OWNER"
+                        ? "bg-primary text-white"
+                        : "bg-gray-700 text-gray-400"
+                    }`}
+                  >
+                    <Building2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-semibold">Theater Owner</div>
+                    <div className="text-[10px] text-gray-400">Manage cinema</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Register Name */}
           {!isLoginView && (

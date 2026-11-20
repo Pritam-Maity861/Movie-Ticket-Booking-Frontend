@@ -1,9 +1,9 @@
 import { create } from "zustand";
 
-export type Role = "USER" | "ADMIN";
+export type Role = "USER" | "ADMIN" | "SUPER_ADMIN" | "THEATER_OWNER";
 
 export interface User {
-  id: number;
+  id: string | number;
   name: string;
   email: string;
   role: Role;

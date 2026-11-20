@@ -132,12 +132,32 @@ export const deleteLanguageApi = async (id: string): Promise<void> => {
   await httpService.delete(`/movie/delete-language/${id}`);
 };
 
+export interface MovieQueryParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  genreId?: string;
+  languageId?: string;
+}
+
 export const getMoviesApi = async (
-  pageParam: number,
+  pageParam: number | MovieQueryParams,
 ): Promise<MoviesPaginatedRes> => {
-  const res = await httpService.get(
-    `/movie/get-all-movie?page=${pageParam}&limit=10`,
-  );
+  let params: Record<string, any> = { page: 1, limit: 10 };
+  if (typeof pageParam === "number") {
+    params.page = pageParam;
+  } else if (pageParam && typeof pageParam === "object") {
+    params = {
+      page: pageParam.page || 1,
+      limit: pageParam.limit || 10,
+      ...(pageParam.search ? { search: pageParam.search } : {}),
+      ...(pageParam.genreId ? { genreId: pageParam.genreId } : {}),
+      ...(pageParam.languageId ? { languageId: pageParam.languageId } : {}),
+    };
+  }
+
+  const query = new URLSearchParams(params).toString();
+  const res = await httpService.get(`/movie/get-all-movie?${query}`);
   return res.data.data;
 };
 

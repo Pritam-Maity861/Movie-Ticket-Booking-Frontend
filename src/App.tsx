@@ -32,6 +32,10 @@ import MovieShowtimes from "./pages/MovieShowtimes";
 import ScrollToTop from "./utils/ScrollToTop";
 import BookingSuccess from "./pages/BookingSuccess";
 import Profile from "./pages/Profile";
+import Login from "./pages/Login";
+import TheaterOwnerDashboard from "./pages/TheaterOwnerDashboard";
+import ApprovalsManager from "./pages/admin/ApprovalsManager";
+import NotFound from "./pages/NotFound";
 
 const MainLayout = () => {
   return (
@@ -74,6 +78,11 @@ const AppContent = () => {
       <ScrollToTop />
       <Toaster />
       <Routes>
+        {/* Dedicated authentication routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Login />} />
+        <Route path="/signup" element={<Login />} />
+
         {/* Routes with Navbar and Footer */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
@@ -120,18 +129,27 @@ const AppContent = () => {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/theater-owner-dashboard"
+            element={
+              <ProtectedRoute allowedRoles={["THEATER_OWNER", "ADMIN", "SUPER_ADMIN"]}>
+                <TheaterOwnerDashboard />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
         {/* admin routes */}
         <Route
           path="/admin-dashboard"
           element={
-            <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <ProtectedRoute allowedRoles={["ADMIN", "SUPER_ADMIN"]}>
               <AdminDashboard />
             </ProtectedRoute>
           }
         >
           <Route index element={<DashboardOverview />} />
+          <Route path="approvals" element={<ApprovalsManager />} />
           <Route path="movies" element={<MoviesManager />} />
           <Route path="genres" element={<GenresManager />} />
           <Route path="languages" element={<LanguagesManager />} />
@@ -143,8 +161,9 @@ const AppContent = () => {
           <Route path="users" element={<UsersManager />} />
         </Route>
 
-        {/* catch-all (no Navbar/Footer) */}
-        <Route path="*" element={<Unauthorized />} />
+        {/* Permission and not-found routes */}
+        <Route path="/unauthorized" element={<Unauthorized />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </>
   );

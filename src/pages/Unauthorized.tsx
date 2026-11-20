@@ -1,83 +1,128 @@
-import { Link } from "react-router-dom";
-import { Clapperboard, HomeIcon, TicketX } from "lucide-react";
+import { useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ShieldAlert, HomeIcon, LogIn, Building2, CheckCircle2 } from "lucide-react";
+import { useAuthStore } from "../store/auth-store";
+import { useLogout } from "../hooks/useAuth";
 
 const Unauthorized = () => {
+  const { user } = useAuthStore();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const logoutMutation = useLogout();
+
+  const state = (location.state as any) || {};
+  const currentRole = (user?.role || state.currentRole || "USER").trim().toUpperCase();
+  const requiredRoles: string[] = state.requiredRoles || ["ADMIN", "SUPER_ADMIN"];
+
+  // Auto-redirect if the current user actually has an authorized role
+  useEffect(() => {
+    const userRole = (user?.role || "").trim().toUpperCase();
+    if (userRole === "ADMIN" || userRole === "SUPER_ADMIN") {
+      const target =
+        state.from?.pathname &&
+        state.from.pathname !== "/unauthorized" &&
+        state.from.pathname !== "/login"
+          ? state.from.pathname
+          : "/admin-dashboard/approvals";
+      navigate(target, { replace: true });
+    }
+  }, [user, navigate, state]);
+
+  const handleSwitchAccount = () => {
+    logoutMutation.mutate(undefined, {
+      onSuccess: () => {
+        navigate("/login", {
+          state: {
+            from: {
+              pathname:
+                state.from?.pathname && state.from.pathname !== "/unauthorized"
+                  ? state.from.pathname
+                  : "/admin-dashboard/approvals",
+            },
+          },
+          replace: true,
+        });
+      },
+    });
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-[85vh] bg-[#09090b] text-white relative overflow-hidden px-4 py-20">
-      {/* Background glow effects */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-72 md:w-140 h-72 md:h-140 bg-primary/10 blur-[130px] rounded-full pointer-events-none"></div>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#09090b] text-white relative overflow-hidden px-4 py-20">
+      {/* Background glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 md:w-140 h-80 md:h-140 bg-red-500/10 blur-[150px] rounded-full pointer-events-none"></div>
 
-      {/* Decorative Film Strip left */}
-      <div className="absolute left-6 top-10 bottom-10 w-8 md:flex flex-col justify-between hidden opacity-[0.03]">
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={i}
-            className="w-5 h-8 border-2 border-white rounded-sm"
-          ></div>
-        ))}
-      </div>
-
-      {/* Decorative Film Strip right */}
-      <div className="absolute right-6 top-10 bottom-10 w-8 md:flex flex-col justify-between hidden opacity-[0.03] items-end">
-        {[...Array(12)].map((_, i) => (
-          <div
-            key={i}
-            className="w-5 h-8 border-2 border-white rounded-sm"
-          ></div>
-        ))}
-      </div>
-
-      <div className="relative z-10 flex flex-col items-center text-center max-w-2xl w-full">
-        {/* Animated Icon Group */}
-        <div className="relative flex items-center justify-center mb-10 group">
-          <div className="absolute w-36 h-36 bg-primary/20 rounded-full blur-2xl animate-pulse"></div>
-
-          <div className="relative bg-[#16161a] p-7 rounded-3xl border border-gray-800 shadow-2xl transform shadow-primary/10 -rotate-6 group-hover:rotate-0 transition-all duration-500 ease-in-out z-10">
-            <TicketX className="w-16 h-16 text-primary drop-shadow-[0_0_15px_rgba(248,69,101,0.6)]" />
-          </div>
-
-          <div className="absolute -bottom-5 -right-5 bg-gray-900 p-4 rounded-2xl border border-gray-800 transform rotate-15 group-hover:rotate-25 transition-all duration-500 ease-in-out z-20">
-            <Clapperboard className="w-8 h-8 text-gray-500" />
-          </div>
+      <div className="relative z-10 flex flex-col items-center text-center max-w-lg w-full space-y-6">
+        {/* Shield Icon */}
+        <div className="relative bg-[#16161a] p-6 rounded-3xl border border-red-500/30 shadow-2xl shadow-red-500/10">
+          <ShieldAlert className="w-16 h-16 text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.5)]" />
         </div>
 
-        {/* Text content */}
-        <h1 className="text-8xl md:text-9xl font-black text-transparent bg-clip-text bg-linear-to-b from-white via-gray-300 to-gray-800 tracking-tighter mb-4 drop-shadow-sm">
-          404
+        {/* 403 Header */}
+        <h1 className="text-8xl md:text-9xl font-black text-transparent bg-clip-text bg-linear-to-b from-white via-gray-300 to-gray-800 tracking-tighter">
+          403
         </h1>
 
-        <div className="flex items-center justify-center gap-4 mb-6">
-          <div className="h-0.5 w-12 md:w-24 bg-linear-to-r from-transparent to-primary/60 rounded-full"></div>
-          <h2 className="text-xl md:text-2xl font-bold tracking-[0.25em] uppercase text-primary drop-shadow-[0_0_10px_rgba(248,69,101,0.3)]">
-            Plot Twist!
+        <div className="space-y-2">
+          <h2 className="text-xl font-bold uppercase tracking-widest text-red-400">
+            Access Restricted
           </h2>
-          <div className="h-0.5 w-12 md:w-24 bg-linear-to-l from-transparent to-primary/60 rounded-full"></div>
+          <p className="text-gray-400 text-sm max-w-md mx-auto">
+            You do not have the required permissions to view this section.
+          </p>
         </div>
 
-        <p className="text-gray-400 text-base md:text-lg mb-12 leading-relaxed font-light mx-auto max-w-md">
-          It looks like you've wandered off the script!{" "}
-          <br className="hidden md:block" />
-          You either{" "}
-          <span className="text-gray-200 font-medium">
-            don't have VIP access
-          </span>{" "}
-          for this scene or the page was left on the cutting room floor.
-        </p>
+        {/* User Context Card */}
+        <div className="bg-white/5 border border-white/10 rounded-2xl p-4 w-full text-xs text-left space-y-2">
+          <div className="flex items-center justify-between pb-2 border-b border-white/10">
+            <span className="text-gray-400 font-semibold uppercase">Your Current Account</span>
+            <span className="px-2.5 py-0.5 rounded-full font-bold bg-white/10 text-white">
+              {currentRole}
+            </span>
+          </div>
+          <div className="text-gray-300">
+            Signed in as: <strong className="text-white">{user?.name || "Guest"}</strong> ({user?.email || "No email"})
+          </div>
+          <div className="text-gray-400">
+            Required role: <strong className="text-amber-400">{requiredRoles.join(" or ")}</strong>
+          </div>
+        </div>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row gap-3 pt-2 w-full sm:w-auto">
+          {(currentRole === "ADMIN" || currentRole === "SUPER_ADMIN") && (
+            <Link
+              to="/admin-dashboard/approvals"
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold rounded-full transition-all shadow-lg shadow-emerald-500/20 text-xs"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              Proceed to Approvals Panel
+            </Link>
+          )}
+
+          {currentRole === "THEATER_OWNER" && (
+            <Link
+              to="/theater-owner-dashboard"
+              className="flex items-center justify-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-600 text-black font-extrabold rounded-full transition-all shadow-lg shadow-amber-500/20 text-xs"
+            >
+              <Building2 className="w-4 h-4" />
+              Go to Theater Owner Dashboard
+            </Link>
+          )}
+
+          <button
+            onClick={handleSwitchAccount}
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-primary hover:bg-primary-dull text-white font-bold rounded-full transition-all shadow-lg shadow-primary/20 text-xs cursor-pointer"
+          >
+            <LogIn className="w-4 h-4" />
+            Switch Account / Sign in as Admin
+          </button>
+
           <Link
             to="/"
-            className="group flex items-center justify-center gap-3 px-8 py-3.5 bg-primary hover:bg-primary-dull text-white rounded-full font-medium transition-all hover:shadow-[0_0_20px_rgba(248,69,101,0.3)] hover:-translate-y-1 w-full sm:w-auto"
+            className="flex items-center justify-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 rounded-full font-bold transition-all text-xs"
           >
-            <HomeIcon className="w-5 h-5 transition-transform group-hover:-translate-x-1" />
-            Back to Homepage
-          </Link>
-          <Link
-            to="/movies"
-            className="group flex items-center justify-center gap-3 px-8 py-3.5 bg-transparent border-2 border-gray-800 hover:border-gray-600 hover:bg-white/5 text-gray-300 hover:text-white rounded-full font-medium transition-all w-full sm:w-auto"
-          >
-            Browse Movies
+            <HomeIcon className="w-4 h-4" />
+            Home
           </Link>
         </div>
       </div>

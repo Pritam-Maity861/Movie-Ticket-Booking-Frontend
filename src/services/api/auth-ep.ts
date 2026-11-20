@@ -9,12 +9,13 @@ export interface RegisterData {
   name: string;
   email: string;
   password: string;
+  role?: Role;
 }
 
 export interface loginResponse {
   accessToken: string;
   user: {
-    id: number;
+    id: string | number;
     name: string;
     email: string;
     role: Role;
@@ -24,7 +25,7 @@ export interface loginResponse {
 export interface RegisterResponse {
   accessToken: string;
   user: {
-    id: number;
+    id: string | number;
     name: string;
     email: string;
     role: Role;
