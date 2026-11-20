@@ -6,75 +6,164 @@ interface MarkdownRendererProps {
   onNavigate?: (url: string) => void;
 }
 
+interface NormalizedUrlResult {
+  isCheckout: boolean;
+  path: string;
+  fullUrl: string;
+}
+
 /**
- * Normalizes any checkout URL (relative or hallucinated external) to the app route `/checkout/:bookingId`
+ * Normalizes any checkout URL (relative path, query parameter, or hallucinated external domain)
+ * into a genuine, workable URL: http://localhost:5173/checkout/:bookingId
  */
-function normalizeUrl(rawUrl: string): { isCheckout: boolean; url: string } {
+function normalizeUrl(rawUrl: string): NormalizedUrlResult {
   const trimmed = rawUrl.trim();
+  const origin =
+    typeof window !== "undefined" && window.location?.origin
+      ? window.location.origin
+      : "http://localhost:5173";
 
   // Pattern 1: query parameter booking_id=UUID or bookingId=UUID
   const queryMatch = trimmed.match(/[?&]booking_?id=([a-zA-Z0-9_-]+)/i);
   if (queryMatch) {
-    return { isCheckout: true, url: `/checkout/${queryMatch[1]}` };
+    const bookingId = queryMatch[1];
+    return {
+      isCheckout: true,
+      path: `/checkout/${bookingId}`,
+      fullUrl: `${origin}/checkout/${bookingId}`,
+    };
   }
 
   // Pattern 2: /checkout/UUID or path ending with /checkout/:id
   const pathMatch = trimmed.match(/\/checkout\/([a-zA-Z0-9_-]+)/i);
   if (pathMatch) {
-    return { isCheckout: true, url: `/checkout/${pathMatch[1]}` };
+    const bookingId = pathMatch[1];
+    return {
+      isCheckout: true,
+      path: `/checkout/${bookingId}`,
+      fullUrl: `${origin}/checkout/${bookingId}`,
+    };
   }
 
-  // Pattern 3: relative path /checkout
+  // Pattern 3: relative path starting with /checkout
   if (trimmed.startsWith("/checkout")) {
-    return { isCheckout: true, url: trimmed };
+    return {
+      isCheckout: true,
+      path: trimmed,
+      fullUrl: `${origin}${trimmed}`,
+    };
   }
 
-  return { isCheckout: false, url: trimmed };
+  // Internal relative link
+  if (trimmed.startsWith("/")) {
+    return {
+      isCheckout: false,
+      path: trimmed,
+      fullUrl: `${origin}${trimmed}`,
+    };
+  }
+
+  return { isCheckout: false, path: trimmed, fullUrl: trimmed };
 }
 
 /**
- * Parses inline formatting: **bold**, *italic*, `code`, and [label](url)
+ * Recursively parses inline formatting:
+ * - Bold with links: **[label](url)**
+ * - Direct links: [label](url)
+ * - Plain bold: **text**
+ * - Plain italic: *text*
+ * - Inline code: `code`
+ * - Plain text
  */
 function renderInline(
   text: string,
   onNavigate?: (url: string) => void,
   keyPrefix = "inline"
 ): React.ReactNode[] {
-  // Regex matches: [label](url), **bold**, *italic*, `code`
+  // Regex matches:
+  // 1. Bold link: **[label](url)**
+  // 2. Normal link: [label](url)
+  // 3. Bold text: **text**
+  // 4. Italic text: *text*
+  // 5. Code: `code`
   const tokenRegex =
-    /(\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g;
+    /(\*\*\[[^\]]+\]\([^)]+\)\*\*|\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g;
 
   const parts = text.split(tokenRegex);
 
   return parts.map((part, index) => {
     const key = `${keyPrefix}-${index}`;
 
-    // Link: [label](url)
+    // Case 1: Bold link **[label](url)**
+    const boldLinkMatch = part.match(/^\*\*\[([^\]]+)\]\(([^)]+)\)\*\*$/);
+    if (boldLinkMatch) {
+      const label = boldLinkMatch[1];
+      const rawUrl = boldLinkMatch[2];
+      const { isCheckout, path, fullUrl } = normalizeUrl(rawUrl);
+
+      if (isCheckout) {
+        return (
+          <a
+            key={key}
+            href={fullUrl}
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigate?.(path);
+            }}
+            title={`Checkout: ${fullUrl}`}
+            className="inline-flex items-center gap-2 px-4 py-2 my-1.5 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-black font-extrabold rounded-xl shadow-lg shadow-amber-500/25 text-xs transition-all hover:scale-105 active:scale-95 cursor-pointer no-underline select-none border border-amber-300"
+          >
+            <CreditCard className="w-4 h-4 text-black shrink-0" />
+            <span>{label}</span>
+          </a>
+        );
+      }
+
+      return (
+        <a
+          key={key}
+          href={fullUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-amber-400 hover:text-amber-300 underline underline-offset-2 inline-flex items-center gap-1 font-bold"
+        >
+          {label}
+          <ExternalLink className="w-3 h-3 inline" />
+        </a>
+      );
+    }
+
+    // Case 2: Standard link [label](url)
     const linkMatch = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
     if (linkMatch) {
       const label = linkMatch[1];
       const rawUrl = linkMatch[2];
-      const { isCheckout, url } = normalizeUrl(rawUrl);
+      const { isCheckout, path, fullUrl } = normalizeUrl(rawUrl);
 
       if (isCheckout) {
         return (
-          <button
+          <a
             key={key}
-            onClick={() => onNavigate?.(url)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 my-1 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-black font-extrabold rounded-lg shadow-md shadow-amber-500/20 text-xs transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
+            href={fullUrl}
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigate?.(path);
+            }}
+            title={`Checkout: ${fullUrl}`}
+            className="inline-flex items-center gap-2 px-4 py-2 my-1.5 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-black font-extrabold rounded-xl shadow-lg shadow-amber-500/25 text-xs transition-all hover:scale-105 active:scale-95 cursor-pointer no-underline select-none border border-amber-300"
           >
-            <CreditCard className="w-3.5 h-3.5" />
-            <span>{label.replace(/^Proceed to Checkout\s*–?\s*/i, "Pay ")}</span>
-          </button>
+            <CreditCard className="w-4 h-4 text-black shrink-0" />
+            <span>{label}</span>
+          </a>
         );
       }
 
       // Internal app navigation vs external link
-      if (url.startsWith("/")) {
+      if (path.startsWith("/")) {
         return (
           <button
             key={key}
-            onClick={() => onNavigate?.(url)}
+            onClick={() => onNavigate?.(path)}
             className="text-amber-400 hover:text-amber-300 font-semibold underline underline-offset-2 cursor-pointer inline-flex items-center gap-1"
           >
             <Ticket className="w-3 h-3" />
@@ -86,7 +175,7 @@ function renderInline(
       return (
         <a
           key={key}
-          href={url}
+          href={fullUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="text-amber-400 hover:text-amber-300 underline underline-offset-2 inline-flex items-center gap-0.5 font-medium"
@@ -97,27 +186,27 @@ function renderInline(
       );
     }
 
-    // Bold: **text**
+    // Case 3: Bold text: **text**
     const boldMatch = part.match(/^\*\*([^*]+)\*\*$/);
     if (boldMatch) {
       return (
         <strong key={key} className="font-bold text-white">
-          {boldMatch[1]}
+          {renderInline(boldMatch[1], onNavigate, `${key}-b`)}
         </strong>
       );
     }
 
-    // Italic: *text*
+    // Case 4: Italic text: *text*
     const italicMatch = part.match(/^\*([^*]+)\*$/);
     if (italicMatch) {
       return (
         <em key={key} className="italic text-gray-300">
-          {italicMatch[1]}
+          {renderInline(italicMatch[1], onNavigate, `${key}-i`)}
         </em>
       );
     }
 
-    // Inline Code: `code`
+    // Case 5: Inline Code: `code`
     const codeMatch = part.match(/^`([^`]+)`$/);
     if (codeMatch) {
       return (
@@ -157,7 +246,6 @@ function isTableSeparator(line: string): boolean {
  */
 function parseRowCells(rowLine: string): string[] {
   const trimmed = rowLine.trim();
-  // Strip leading and trailing '|'
   const inner = trimmed.replace(/^\|/, "").replace(/\|$/, "");
   return inner.split("|").map((c) => c.trim());
 }
