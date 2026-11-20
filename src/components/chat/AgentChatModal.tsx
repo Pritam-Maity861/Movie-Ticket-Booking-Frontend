@@ -15,6 +15,7 @@ import {
   type GenerativeUIAction,
 } from "../../services/api/ai-chat-ep";
 import { useNavigate } from "react-router-dom";
+import MarkdownRenderer from "./MarkdownRenderer";
 
 interface Message {
   id: string;
@@ -196,7 +197,17 @@ export const AgentChatModal: React.FC = () => {
                       : "bg-white/5 border border-white/10 text-gray-200 rounded-bl-xs shadow-sm"
                   }`}
                 >
-                  <p className="whitespace-pre-wrap">{msg.content}</p>
+                  {msg.role === "assistant" ? (
+                    <MarkdownRenderer
+                      content={msg.content}
+                      onNavigate={(url) => {
+                        setIsOpen(false);
+                        navigate(url);
+                      }}
+                    />
+                  ) : (
+                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                  )}
 
                   {/* Generative UI: Booking Hold Card */}
                   {msg.generativeUI?.type === "BOOKING_HOLD" && (
