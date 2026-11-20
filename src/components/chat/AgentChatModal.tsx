@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import {
   sendChatMessageApi,
+  streamChatMessageApi,
   type ChatHistoryItem,
   type GenerativeUIAction,
 } from "../../services/api/ai-chat-ep";
@@ -84,7 +85,16 @@ export const AgentChatModal: React.FC = () => {
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    const assistantMessageId = `assistant-${Date.now()}`;
+    const initialAssistantMessage: Message = {
+      id: assistantMessageId,
+      role: "assistant",
+      content: "",
+      generativeUI: null,
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage, initialAssistantMessage]);
     if (!customPrompt) setInputMessage("");
     setIsLoading(true);
 
@@ -99,30 +109,81 @@ export const AgentChatModal: React.FC = () => {
       : "cinemate-session";
 
     try {
-      const data = await sendChatMessageApi(
+      await streamChatMessageApi(
         textToSend,
         historyPayload,
         sessionId,
+        (delta) => {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMessageId
+                ? { ...m, content: m.content + delta }
+                : m
+            )
+          );
+        },
+        (ui) => {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantMessageId
+                ? { ...m, generativeUI: ui }
+                : m
+            )
+          );
+        },
+        () => {
+          setIsLoading(false);
+        },
+        async (streamErr) => {
+          console.warn("[Stream Chat] Falling back to standard JSON API:", streamErr);
+          try {
+            const data = await sendChatMessageApi(
+              textToSend,
+              historyPayload,
+              sessionId
+            );
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === assistantMessageId
+                  ? {
+                      ...m,
+                      content: data.response,
+                      generativeUI: data.generative_ui,
+                    }
+                  : m
+              )
+            );
+          } catch (fallbackErr: any) {
+            setMessages((prev) =>
+              prev.map((m) =>
+                m.id === assistantMessageId
+                  ? {
+                      ...m,
+                      content: `Sorry, I encountered an issue connecting to CineMate AI: ${
+                        fallbackErr?.message || "Please check that ai-service is running on port 8000."
+                      }`,
+                    }
+                  : m
+              )
+            );
+          } finally {
+            setIsLoading(false);
+          }
+        }
       );
-
-      const assistantMessage: Message = {
-        id: `assistant-${Date.now()}`,
-        role: "assistant",
-        content: data.response,
-        generativeUI: data.generative_ui,
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
     } catch (err: any) {
-      const errorMessage: Message = {
-        id: `err-${Date.now()}`,
-        role: "assistant",
-        content: `Sorry, I encountered an issue connecting to the AI brain: ${err?.message || "Please make sure ai-service is running on port 8000"}.`,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
-    } finally {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === assistantMessageId
+            ? {
+                ...m,
+                content: `Sorry, I encountered an issue connecting to CineMate AI: ${
+                  err?.message || "Please make sure ai-service is running on port 8000."
+                }`,
+              }
+            : m
+        )
+      );
       setIsLoading(false);
     }
   };
@@ -258,13 +319,23 @@ export const AgentChatModal: React.FC = () => {
                   }`}
                 >
                   {msg.role === "assistant" ? (
-                    <MarkdownRenderer
-                      content={msg.content}
-                      onNavigate={(url) => {
-                        setIsOpen(false);
-                        navigate(url);
-                      }}
-                    />
+                    <>
+                      {msg.content ? (
+                        <MarkdownRenderer
+                          content={msg.content}
+                          onNavigate={(url) => {
+                            setIsOpen(false);
+                            navigate(url);
+                          }}
+                        />
+                      ) : (
+                        <div className="flex items-center gap-1.5 py-1 text-gray-400">
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce [animation-delay:0.2s]" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce [animation-delay:0.4s]" />
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <p className="whitespace-pre-wrap">{msg.content}</p>
                   )}
@@ -306,18 +377,7 @@ export const AgentChatModal: React.FC = () => {
               </div>
             ))}
 
-            {isLoading && (
-              <div className="flex gap-2.5 items-center text-gray-400 text-xs">
-                <div className="w-7 h-7 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                  <Bot className="w-3.5 h-3.5 animate-spin" />
-                </div>
-                <div className="bg-white/5 border border-white/10 px-3 py-2 rounded-2xl flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce [animation-delay:0.2s]" />
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce [animation-delay:0.4s]" />
-                </div>
-              </div>
-            )}
+
 
             <div ref={messagesEndRef} />
           </div>

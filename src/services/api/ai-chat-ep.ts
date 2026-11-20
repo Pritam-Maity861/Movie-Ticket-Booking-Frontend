@@ -82,6 +82,7 @@ export const streamChatMessageApi = async (
         message,
         session_id: sessionId,
         history,
+        auth_token: token || undefined,
         stream: true,
       }),
     });
@@ -99,15 +100,15 @@ export const streamChatMessageApi = async (
       if (done) break;
 
       buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n\n");
-      buffer = lines.pop() || "";
+      const blocks = buffer.split("\n\n");
+      buffer = blocks.pop() || "";
 
-      for (const line of lines) {
-        if (!line.trim()) continue;
-        const eventMatch = line.match(/^event:\s*(.+)$/m);
-        const dataMatch = line.match(/^data:\s*(.+)$/m);
+      for (const block of blocks) {
+        if (!block.trim()) continue;
+        const eventMatch = block.match(/^event:\s*(.+)$/m);
+        const dataMatch = block.match(/^data:\s*(.+)$/m);
 
-        const eventType = eventMatch ? eventMatch[1].trim() : "message";
+        const eventType = eventMatch ? eventMatch[1].trim() : "chunk";
         const rawData = dataMatch ? dataMatch[1].trim() : "";
 
         if (eventType === "done" || rawData === "[DONE]") {
@@ -117,8 +118,8 @@ export const streamChatMessageApi = async (
 
         try {
           const parsed = JSON.parse(rawData);
-          if (eventType === "message" && parsed.content) {
-            onDelta(parsed.content);
+          if ((eventType === "chunk" || eventType === "message") && (parsed.delta || parsed.content)) {
+            onDelta(parsed.delta || parsed.content);
           } else if (eventType === "generative_ui" && onGenerativeUI) {
             onGenerativeUI(parsed);
           } else if (eventType === "error" && onError) {
@@ -126,7 +127,7 @@ export const streamChatMessageApi = async (
           }
         } catch {
           // Plain text fallback
-          if (rawData && eventType === "message") {
+          if (rawData && (eventType === "chunk" || eventType === "message")) {
             onDelta(rawData);
           }
         }
