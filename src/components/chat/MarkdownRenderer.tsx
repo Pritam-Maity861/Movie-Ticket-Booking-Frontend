@@ -80,12 +80,6 @@ function renderInline(
   onNavigate?: (url: string) => void,
   keyPrefix = "inline"
 ): React.ReactNode[] {
-  // Regex matches:
-  // 1. Bold link: **[label](url)**
-  // 2. Normal link: [label](url)
-  // 3. Bold text: **text**
-  // 4. Italic text: *text*
-  // 5. Code: `code`
   const tokenRegex =
     /(\*\*\[[^\]]+\]\([^)]+\)\*\*|\[[^\]]+\]\([^)]+\)|\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g;
 
@@ -111,11 +105,24 @@ function renderInline(
               onNavigate?.(path);
             }}
             title={`Checkout: ${fullUrl}`}
-            className="inline-flex items-center gap-2 px-4 py-2 my-1.5 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-black font-extrabold rounded-xl shadow-lg shadow-amber-500/25 text-xs transition-all hover:scale-105 active:scale-95 cursor-pointer no-underline select-none border border-amber-300"
+            className="inline-flex items-center gap-2 px-4 py-2 my-1.5 bg-primary hover:bg-primary-dull text-white font-black rounded-xl shadow-lg shadow-primary/30 text-xs transition-all hover:scale-105 active:scale-95 cursor-pointer no-underline select-none border border-primary/50"
           >
-            <CreditCard className="w-4 h-4 text-black shrink-0" />
+            <CreditCard className="w-4 h-4 text-white shrink-0" />
             <span>{label}</span>
           </a>
+        );
+      }
+
+      if (path.startsWith("/")) {
+        return (
+          <button
+            key={key}
+            onClick={() => onNavigate?.(path)}
+            className="text-primary hover:text-primary-dull font-bold underline underline-offset-2 cursor-pointer inline-flex items-center gap-1"
+          >
+            <Ticket className="w-3.5 h-3.5" />
+            {label}
+          </button>
         );
       }
 
@@ -125,7 +132,7 @@ function renderInline(
           href={fullUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-amber-400 hover:text-amber-300 underline underline-offset-2 inline-flex items-center gap-1 font-bold"
+          className="text-primary hover:text-primary-dull underline underline-offset-2 inline-flex items-center gap-1 font-bold"
         >
           {label}
           <ExternalLink className="w-3 h-3 inline" />
@@ -150,9 +157,9 @@ function renderInline(
               onNavigate?.(path);
             }}
             title={`Checkout: ${fullUrl}`}
-            className="inline-flex items-center gap-2 px-4 py-2 my-1.5 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-black font-extrabold rounded-xl shadow-lg shadow-amber-500/25 text-xs transition-all hover:scale-105 active:scale-95 cursor-pointer no-underline select-none border border-amber-300"
+            className="inline-flex items-center gap-2 px-4 py-2 my-1.5 bg-primary hover:bg-primary-dull text-white font-black rounded-xl shadow-lg shadow-primary/30 text-xs transition-all hover:scale-105 active:scale-95 cursor-pointer no-underline select-none border border-primary/50"
           >
-            <CreditCard className="w-4 h-4 text-black shrink-0" />
+            <CreditCard className="w-4 h-4 text-white shrink-0" />
             <span>{label}</span>
           </a>
         );
@@ -164,9 +171,9 @@ function renderInline(
           <button
             key={key}
             onClick={() => onNavigate?.(path)}
-            className="text-amber-400 hover:text-amber-300 font-semibold underline underline-offset-2 cursor-pointer inline-flex items-center gap-1"
+            className="text-primary hover:text-primary-dull font-bold underline underline-offset-2 cursor-pointer inline-flex items-center gap-1"
           >
-            <Ticket className="w-3 h-3" />
+            <Ticket className="w-3.5 h-3.5" />
             {label}
           </button>
         );
@@ -178,7 +185,7 @@ function renderInline(
           href={fullUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-amber-400 hover:text-amber-300 underline underline-offset-2 inline-flex items-center gap-0.5 font-medium"
+          className="text-primary hover:text-primary-dull underline underline-offset-2 inline-flex items-center gap-0.5 font-medium"
         >
           {label}
           <ExternalLink className="w-3 h-3 inline" />
@@ -212,7 +219,7 @@ function renderInline(
       return (
         <code
           key={key}
-          className="px-1.5 py-0.5 rounded bg-white/10 text-amber-300 font-mono text-[11px]"
+          className="px-1.5 py-0.5 rounded bg-white/10 text-primary font-mono text-[11px] border border-white/5"
         >
           {codeMatch[1]}
         </code>
@@ -276,7 +283,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       nodes.push(
         <h4
           key={`h4-${index}`}
-          className="text-xs font-bold text-amber-300 mt-2.5 mb-1 flex items-center gap-1.5"
+          className="text-xs font-black text-primary mt-2.5 mb-1 flex items-center gap-1.5 tracking-wide"
         >
           {renderInline(trimmed.slice(4), onNavigate, `h4-${index}`)}
         </h4>
@@ -288,7 +295,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       nodes.push(
         <h3
           key={`h3-${index}`}
-          className="text-sm font-extrabold text-amber-400 mt-3 mb-1.5"
+          className="text-sm font-black text-primary mt-3 mb-1.5 tracking-wide"
         >
           {renderInline(trimmed.slice(3), onNavigate, `h3-${index}`)}
         </h3>
@@ -300,7 +307,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       nodes.push(
         <h2
           key={`h2-${index}`}
-          className="text-base font-black text-amber-500 mt-3 mb-2"
+          className="text-base font-black text-primary mt-3 mb-2 tracking-wide"
         >
           {renderInline(trimmed.slice(2), onNavigate, `h2-${index}`)}
         </h2>
@@ -327,11 +334,11 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       nodes.push(
         <div
           key={`table-${index}`}
-          className="my-2.5 overflow-x-auto rounded-xl border border-white/15 bg-black/40 shadow-inner"
+          className="my-2.5 overflow-x-auto rounded-xl border border-white/15 bg-black/50 shadow-inner"
         >
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-white/10 border-b border-white/10 text-amber-300 font-bold uppercase tracking-wider text-[11px]">
+              <tr className="bg-primary/10 border-b border-primary/20 text-primary font-bold uppercase tracking-wider text-[11px]">
                 {headerCells.map((head, hIdx) => (
                   <th key={hIdx} className="px-3 py-2 text-left">
                     {renderInline(head, onNavigate, `th-${hIdx}`)}
@@ -377,7 +384,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
               key={bIdx}
               className="flex items-start gap-2 text-gray-200 text-xs leading-relaxed"
             >
-              <span className="text-amber-400 font-bold select-none">•</span>
+              <span className="text-primary font-black select-none">•</span>
               <span className="flex-1">
                 {renderInline(item, onNavigate, `li-${bIdx}`)}
               </span>
@@ -407,7 +414,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
               key={nIdx}
               className="flex items-start gap-2 text-gray-200 text-xs leading-relaxed"
             >
-              <span className="text-amber-400 font-semibold select-none text-[11px] shrink-0">
+              <span className="text-primary font-bold select-none text-[11px] shrink-0">
                 {item.num}.
               </span>
               <span className="flex-1">

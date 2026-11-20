@@ -41,6 +41,7 @@ export const sendChatMessageApi = async (
       message,
       session_id: sessionId,
       history,
+      auth_token: token || undefined,
       stream: false,
     }),
   });
