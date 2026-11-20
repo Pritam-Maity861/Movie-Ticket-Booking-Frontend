@@ -36,6 +36,7 @@ import Login from "./pages/Login";
 import TheaterOwnerDashboard from "./pages/TheaterOwnerDashboard";
 import ApprovalsManager from "./pages/admin/ApprovalsManager";
 import NotFound from "./pages/NotFound";
+import AgentChatModal from "./components/chat/AgentChatModal";
 
 const MainLayout = () => {
   return (
@@ -43,6 +44,7 @@ const MainLayout = () => {
       <Navbar />
       <Outlet />
       <Footer />
+      <AgentChatModal />
     </>
   );
 };
