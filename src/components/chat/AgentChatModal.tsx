@@ -19,6 +19,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import MarkdownRenderer from "./MarkdownRenderer";
 import { useAuthStore } from "../../store/auth-store";
+import { tokenManager } from "../../lib/token-manager";
 
 interface Message {
   id: string;
@@ -45,6 +46,8 @@ const AUTH_PROMPTS = [
 export const AgentChatModal: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, isAuthenticated } = useAuthStore();
+  const token = tokenManager.getToken();
+  const isUserLoggedIn = isAuthenticated || !!token;
   const navigate = useNavigate();
 
   const [messages, setMessages] = useState<Message[]>([
@@ -91,9 +94,9 @@ export const AgentChatModal: React.FC = () => {
       content: m.content,
     }));
 
-    const sessionId = isAuthenticated && user?.id
+    const sessionId = isUserLoggedIn && user?.id
       ? `cinemate-user-${user.id}`
-      : "cinemate-guest-session";
+      : "cinemate-session";
 
     try {
       const data = await sendChatMessageApi(
@@ -136,7 +139,7 @@ export const AgentChatModal: React.FC = () => {
     ]);
   };
 
-  const quickPrompts = isAuthenticated ? AUTH_PROMPTS : GUEST_PROMPTS;
+  const quickPrompts = isUserLoggedIn ? AUTH_PROMPTS : GUEST_PROMPTS;
 
   return (
     <>
@@ -167,7 +170,7 @@ export const AgentChatModal: React.FC = () => {
               <div>
                 <h3 className="text-sm font-black text-white flex items-center gap-2">
                   CineMate AI
-                  {isAuthenticated ? (
+                  {isUserLoggedIn ? (
                     <span className="text-[10px] bg-emerald-500/15 text-emerald-400 font-bold px-2 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                       {user?.name ? user.name.split(" ")[0] : "Logged In"}
@@ -180,7 +183,7 @@ export const AgentChatModal: React.FC = () => {
                 </h3>
                 <p className="text-[11px] text-gray-400 flex items-center gap-1">
                   <span>Intelligent Ticketing Concierge</span>
-                  {!isAuthenticated && (
+                  {!isUserLoggedIn && (
                     <button
                       onClick={() => {
                         setIsOpen(false);
@@ -214,7 +217,7 @@ export const AgentChatModal: React.FC = () => {
           </div>
 
           {/* Auth Banner: Subtle prompt if user is guest */}
-          {!isAuthenticated && (
+          {!isUserLoggedIn && (
             <div className="px-4 py-2 bg-primary/10 border-b border-primary/20 flex items-center justify-between text-[11px]">
               <span className="text-gray-300 flex items-center gap-1.5">
                 <ShieldCheck className="w-3.5 h-3.5 text-primary shrink-0" />
