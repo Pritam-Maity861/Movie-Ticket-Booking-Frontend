@@ -223,7 +223,7 @@ export const AgentChatModal: React.FC = () => {
       {isOpen && (
         <div className="fixed bottom-6 right-6 z-50 w-[92vw] sm:w-[420px] h-[600px] max-h-[85vh] bg-[#101014]/95 border border-white/10 rounded-3xl shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl animate-in fade-in zoom-in-95 duration-200 font-sans">
           {/* Header */}
-          <div className="px-5 py-3.5 border-b border-white/10 bg-white/[0.03] flex items-center justify-between">
+          <div className="px-5 py-3.5 border-b border-white/10 bg-white/3 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-bold shadow-md shadow-primary/30">
                 <Bot className="w-4 h-4" />
@@ -403,7 +403,7 @@ export const AgentChatModal: React.FC = () => {
               e.preventDefault();
               handleSendMessage();
             }}
-            className="p-3 border-t border-white/10 bg-white/[0.02] flex items-center gap-2"
+            className="p-3 border-t border-white/10 bg-white/2 flex items-center gap-2"
           >
             <input
               type="text"

@@ -95,42 +95,54 @@ export const streamChatMessageApi = async (
     const decoder = new TextDecoder();
     let buffer = "";
 
+    const processBlock = (block: string) => {
+      const trimmed = block.trim();
+      if (!trimmed) return false;
+
+      const eventMatch = trimmed.match(/^event:\s*(.+)$/m);
+      const dataMatch = trimmed.match(/^data:\s*(.+)$/m);
+
+      const eventType = eventMatch ? eventMatch[1].trim() : "chunk";
+      const rawData = dataMatch ? dataMatch[1].trim() : "";
+
+      if (eventType === "done" || rawData === "[DONE]") {
+        if (onDone) onDone();
+        return true;
+      }
+
+      try {
+        const parsed = JSON.parse(rawData);
+        if ((eventType === "chunk" || eventType === "message") && (parsed.delta || parsed.content)) {
+          onDelta(parsed.delta || parsed.content);
+        } else if (eventType === "generative_ui" && onGenerativeUI) {
+          onGenerativeUI(parsed);
+        } else if (eventType === "error" && onError) {
+          onError(parsed.error);
+        }
+      } catch {
+        if (rawData && (eventType === "chunk" || eventType === "message")) {
+          onDelta(rawData);
+        }
+      }
+      return false;
+    };
+
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
+      if (done) {
+        if (buffer.trim()) {
+          processBlock(buffer);
+        }
+        break;
+      }
 
       buffer += decoder.decode(value, { stream: true });
-      const blocks = buffer.split("\n\n");
+      const blocks = buffer.split(/\r?\n\r?\n/);
       buffer = blocks.pop() || "";
 
       for (const block of blocks) {
-        if (!block.trim()) continue;
-        const eventMatch = block.match(/^event:\s*(.+)$/m);
-        const dataMatch = block.match(/^data:\s*(.+)$/m);
-
-        const eventType = eventMatch ? eventMatch[1].trim() : "chunk";
-        const rawData = dataMatch ? dataMatch[1].trim() : "";
-
-        if (eventType === "done" || rawData === "[DONE]") {
-          if (onDone) onDone();
-          return;
-        }
-
-        try {
-          const parsed = JSON.parse(rawData);
-          if ((eventType === "chunk" || eventType === "message") && (parsed.delta || parsed.content)) {
-            onDelta(parsed.delta || parsed.content);
-          } else if (eventType === "generative_ui" && onGenerativeUI) {
-            onGenerativeUI(parsed);
-          } else if (eventType === "error" && onError) {
-            onError(parsed.error);
-          }
-        } catch {
-          // Plain text fallback
-          if (rawData && (eventType === "chunk" || eventType === "message")) {
-            onDelta(rawData);
-          }
-        }
+        const isDone = processBlock(block);
+        if (isDone) return;
       }
     }
 
