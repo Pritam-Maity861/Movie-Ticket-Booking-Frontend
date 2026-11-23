@@ -8,7 +8,7 @@ export interface ChatHistoryItem {
 }
 
 export interface GenerativeUIAction {
-  type: "MOVIES_CAROUSEL" | "SHOWTIMES_LIST" | "SEAT_SELECTOR" | "BOOKING_HOLD";
+  type: "MOVIES_CAROUSEL" | "SHOWTIMES_LIST" | "SEAT_SELECTOR" | "BOOKING_HOLD" | "TICKET_CARD";
   data: any;
 }
 

@@ -8,13 +8,13 @@ interface MarkdownRendererProps {
 
 interface NormalizedUrlResult {
   isCheckout: boolean;
+  isTicket: boolean;
   path: string;
   fullUrl: string;
 }
 
 /**
- * Normalizes any checkout URL (relative path, query parameter, or hallucinated external domain)
- * into a genuine, workable URL: http://localhost:5173/checkout/:bookingId
+ * Normalizes any checkout or ticket URL into a genuine, workable URL.
  */
 function normalizeUrl(rawUrl: string): NormalizedUrlResult {
   const trimmed = rawUrl.trim();
@@ -23,32 +23,57 @@ function normalizeUrl(rawUrl: string): NormalizedUrlResult {
       ? window.location.origin
       : "http://localhost:5173";
 
-  // Pattern 1: query parameter booking_id=UUID or bookingId=UUID
+  // Ticket Pattern 1: /booking-success/UUID or path ending with /booking-success/:id
+  const ticketMatch = trimmed.match(/\/booking-success\/([a-zA-Z0-9_-]+)/i);
+  if (ticketMatch) {
+    const bookingId = ticketMatch[1];
+    return {
+      isCheckout: false,
+      isTicket: true,
+      path: `/booking-success/${bookingId}`,
+      fullUrl: `${origin}/booking-success/${bookingId}`,
+    };
+  }
+
+  // Ticket Pattern 2: relative path starting with /booking-success
+  if (trimmed.startsWith("/booking-success")) {
+    return {
+      isCheckout: false,
+      isTicket: true,
+      path: trimmed,
+      fullUrl: `${origin}${trimmed}`,
+    };
+  }
+
+  // Checkout Pattern 1: query parameter booking_id=UUID or bookingId=UUID
   const queryMatch = trimmed.match(/[?&]booking_?id=([a-zA-Z0-9_-]+)/i);
   if (queryMatch) {
     const bookingId = queryMatch[1];
     return {
       isCheckout: true,
+      isTicket: false,
       path: `/checkout/${bookingId}`,
       fullUrl: `${origin}/checkout/${bookingId}`,
     };
   }
 
-  // Pattern 2: /checkout/UUID or path ending with /checkout/:id
+  // Checkout Pattern 2: /checkout/UUID or path ending with /checkout/:id
   const pathMatch = trimmed.match(/\/checkout\/([a-zA-Z0-9_-]+)/i);
   if (pathMatch) {
     const bookingId = pathMatch[1];
     return {
       isCheckout: true,
+      isTicket: false,
       path: `/checkout/${bookingId}`,
       fullUrl: `${origin}/checkout/${bookingId}`,
     };
   }
 
-  // Pattern 3: relative path starting with /checkout
+  // Checkout Pattern 3: relative path starting with /checkout
   if (trimmed.startsWith("/checkout")) {
     return {
       isCheckout: true,
+      isTicket: false,
       path: trimmed,
       fullUrl: `${origin}${trimmed}`,
     };
@@ -58,12 +83,13 @@ function normalizeUrl(rawUrl: string): NormalizedUrlResult {
   if (trimmed.startsWith("/")) {
     return {
       isCheckout: false,
+      isTicket: false,
       path: trimmed,
       fullUrl: `${origin}${trimmed}`,
     };
   }
 
-  return { isCheckout: false, path: trimmed, fullUrl: trimmed };
+  return { isCheckout: false, isTicket: false, path: trimmed, fullUrl: trimmed };
 }
 
 /**
@@ -93,7 +119,25 @@ function renderInline(
     if (boldLinkMatch) {
       const label = boldLinkMatch[1];
       const rawUrl = boldLinkMatch[2];
-      const { isCheckout, path, fullUrl } = normalizeUrl(rawUrl);
+      const { isCheckout, isTicket, path, fullUrl } = normalizeUrl(rawUrl);
+
+      if (isTicket) {
+        return (
+          <a
+            key={key}
+            href={fullUrl}
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigate?.(path);
+            }}
+            title={`View Ticket: ${fullUrl}`}
+            className="inline-flex items-center gap-2 px-4 py-2 my-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl shadow-lg shadow-emerald-900/30 text-xs transition-all hover:scale-105 active:scale-95 cursor-pointer no-underline select-none border border-emerald-400/50"
+          >
+            <Ticket className="w-4 h-4 text-white shrink-0" />
+            <span>{label}</span>
+          </a>
+        );
+      }
 
       if (isCheckout) {
         return (
@@ -145,7 +189,25 @@ function renderInline(
     if (linkMatch) {
       const label = linkMatch[1];
       const rawUrl = linkMatch[2];
-      const { isCheckout, path, fullUrl } = normalizeUrl(rawUrl);
+      const { isCheckout, isTicket, path, fullUrl } = normalizeUrl(rawUrl);
+
+      if (isTicket) {
+        return (
+          <a
+            key={key}
+            href={fullUrl}
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigate?.(path);
+            }}
+            title={`View Ticket: ${fullUrl}`}
+            className="inline-flex items-center gap-2 px-4 py-2 my-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-black rounded-xl shadow-lg shadow-emerald-900/30 text-xs transition-all hover:scale-105 active:scale-95 cursor-pointer no-underline select-none border border-emerald-400/50"
+          >
+            <Ticket className="w-4 h-4 text-white shrink-0" />
+            <span>{label}</span>
+          </a>
+        );
+      }
 
       if (isCheckout) {
         return (
@@ -350,7 +412,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
               {rows.map((row, rIdx) => (
                 <tr
                   key={rIdx}
-                  className={rIdx % 2 === 0 ? "bg-white/[0.02]" : "bg-white/[0.05]"}
+                  className={rIdx % 2 === 0 ? "bg-white/2" : "bg-white/5"}
                 >
                   {row.map((cell, cIdx) => (
                     <td

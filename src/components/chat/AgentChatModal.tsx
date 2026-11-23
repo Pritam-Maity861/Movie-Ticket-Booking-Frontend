@@ -10,6 +10,11 @@ import {
   Clock,
   LogIn,
   ShieldCheck,
+  Ticket,
+  Download,
+  CheckCircle2,
+  Calendar,
+  MapPin,
 } from "lucide-react";
 import {
   sendChatMessageApi,
@@ -21,6 +26,7 @@ import { useNavigate } from "react-router-dom";
 import MarkdownRenderer from "./MarkdownRenderer";
 import { useAuthStore } from "../../store/auth-store";
 import { tokenManager } from "../../lib/token-manager";
+import { generateTicketPDF } from "../../utils/generateTicket";
 
 interface Message {
   id: string;
@@ -73,6 +79,50 @@ export const AgentChatModal: React.FC = () => {
       scrollToBottom();
     }
   }, [messages, isOpen]);
+
+  const handleDownloadPDF = async (data: any) => {
+    try {
+      let bookingToUse = data?.raw_booking;
+      if (!bookingToUse) {
+        bookingToUse = {
+          id: data.booking_id,
+          createdAt: new Date().toISOString(),
+          totalAmount: data.total_amount,
+          showtime: {
+            startTime: data.showtime || new Date().toISOString(),
+            movie: { title: data.movie_title || "Movie" },
+            screen: {
+              name: data.screen_name || "Screen 1",
+              theater: {
+                name: data.theater_name || "CineMate Cinema",
+                address: data.theater_address || "CineMate Complex",
+              },
+            },
+          },
+          seats: (Array.isArray(data.seats) ? data.seats : []).map((s: string) => {
+            const match = s.match(/^([A-Za-z]+)(\d+)$/);
+            return {
+              seat: {
+                row: match ? match[1] : s,
+                number: match ? parseInt(match[2], 10) : "",
+              },
+            };
+          }),
+        };
+      } else {
+        if (bookingToUse.showtime?.screen && !bookingToUse.showtime.screen.theater) {
+          bookingToUse.showtime.screen.theater = bookingToUse.showtime.theater || {
+            name: data.theater_name || "CineMate Cinema",
+            address: data.theater_address || "CineMate Complex",
+          };
+        }
+      }
+      await generateTicketPDF(bookingToUse);
+    } catch (err) {
+      console.error("Error generating PDF ticket:", err);
+      navigate(data.ticket_url || `/booking-success/${data.booking_id}`);
+    }
+  };
 
   const handleSendMessage = async (customPrompt?: string) => {
     const textToSend = customPrompt || inputMessage.trim();
@@ -365,6 +415,87 @@ export const AgentChatModal: React.FC = () => {
                           <CreditCard className="w-3.5 h-3.5" /> Proceed to Checkout
                         </button>
                       )}
+                    </div>
+                  )}
+
+                  {/* Generative UI: Confirmed E-Ticket Card */}
+                  {msg.generativeUI?.type === "TICKET_CARD" && (
+                    <div className="mt-3 p-3.5 bg-gradient-to-br from-emerald-950/50 via-zinc-900/90 to-zinc-950 border border-emerald-500/40 rounded-2xl shadow-xl space-y-3">
+                      {/* Header */}
+                      <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2">
+                        <span className="flex items-center gap-1.5 text-emerald-400 font-bold text-xs tracking-wide">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                          CONFIRMED E-TICKET
+                        </span>
+                        <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-mono px-2 py-0.5 rounded-full border border-emerald-500/30 font-semibold">
+                          Paid ₹{msg.generativeUI.data?.total_amount}
+                        </span>
+                      </div>
+
+                      {/* Body: Poster + Details */}
+                      <div className="flex gap-3 items-start">
+                        {msg.generativeUI.data?.poster_url ? (
+                          <img
+                            src={msg.generativeUI.data.poster_url}
+                            alt={msg.generativeUI.data.movie_title || "Movie Poster"}
+                            className="w-14 h-20 object-cover rounded-lg border border-white/10 shrink-0 shadow-md"
+                          />
+                        ) : (
+                          <div className="w-14 h-20 bg-zinc-800 rounded-lg flex items-center justify-center shrink-0 border border-white/10 text-zinc-500">
+                            <Ticket className="w-6 h-6" />
+                          </div>
+                        )}
+
+                        <div className="flex-1 min-w-0 space-y-1">
+                          <h4 className="font-bold text-white text-sm truncate leading-snug">
+                            {msg.generativeUI.data?.movie_title}
+                          </h4>
+                          <p className="text-[11px] text-zinc-300 flex items-center gap-1 truncate">
+                            <MapPin className="w-3 h-3 text-emerald-400 shrink-0" />
+                            <span className="truncate">
+                              {msg.generativeUI.data?.theater_name} ({msg.generativeUI.data?.screen_name})
+                            </span>
+                          </p>
+                          <p className="text-[11px] text-zinc-400 flex items-center gap-1">
+                            <Calendar className="w-3 h-3 text-zinc-400 shrink-0" />
+                            <span>
+                              {msg.generativeUI.data?.showtime
+                                ? new Date(msg.generativeUI.data.showtime).toLocaleString([], {
+                                    dateStyle: "medium",
+                                    timeStyle: "short",
+                                  })
+                                : "Confirmed Showtime"}
+                            </span>
+                          </p>
+                          <div className="flex items-center gap-1.5 pt-0.5">
+                            <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">Seats:</span>
+                            <span className="text-xs font-bold text-emerald-300 tracking-wide">
+                              {Array.isArray(msg.generativeUI.data?.seats)
+                                ? msg.generativeUI.data.seats.join(", ")
+                                : msg.generativeUI.data?.seats || "N/A"}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-2 pt-1 border-t border-white/10">
+                        <button
+                          onClick={() => handleDownloadPDF(msg.generativeUI?.data)}
+                          className="flex-1 py-2 px-3 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white font-bold rounded-xl flex items-center justify-center gap-1.5 transition text-xs cursor-pointer shadow-lg shadow-emerald-950/50"
+                        >
+                          <Download className="w-3.5 h-3.5" /> Download PDF
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsOpen(false);
+                            navigate(msg.generativeUI?.data?.ticket_url || `/booking-success/${msg.generativeUI?.data?.booking_id}`);
+                          }}
+                          className="py-2 px-3 bg-white/10 hover:bg-white/15 active:scale-95 text-zinc-200 hover:text-white font-bold rounded-xl flex items-center justify-center gap-1.5 transition text-xs cursor-pointer border border-white/10"
+                        >
+                          <Ticket className="w-3.5 h-3.5" /> View
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
